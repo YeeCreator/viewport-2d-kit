@@ -1,16 +1,18 @@
-# @chess-games/viewport-kit
+# viewport-kit-react
 
-Reusable 2D viewport (pan + zoom) for React.
+可复用的 React 2D 视口组件（平移 + 缩放）。
 
-This package is extracted from the `chess-games-react` project and is kept private (no git repo on purpose).
+该包从 `chess-games-react` 项目中抽离，保持私有（不建立独立远程仓库）。
 
-## Development
+## 开发
 
-- Build once: `pnpm -C viewport-kit-react build`
-- Watch: `pnpm -C viewport-kit-react dev`
+- 单次构建：`pnpm -C viewport-kit-react build`
+- 监听构建：`pnpm -C viewport-kit-react dev`
 
-## Usage (inside workspace)
+## 使用（本地项目）
+
+本地联调用法请参考 [docs/使用指南.md](docs/使用指南.md)。
 
 ```ts
-import { Viewport2D, installPreventPageZoom } from '@chess-games/viewport-kit';
+import { Viewport2D, installPreventPageZoom } from 'viewport-kit-react';
 ```
