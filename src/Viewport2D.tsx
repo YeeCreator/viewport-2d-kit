@@ -3,6 +3,7 @@ import type { Viewport2DController, Viewport2DCamera } from './types';
 import type { ViewBox } from './viewportMath';
 import { cameraToCssTransform } from './viewportMath';
 import { useViewportCamera } from './useViewportCamera';
+import type { ViewportInteractionMode, ViewportWheelEventLike } from './interactions';
 
 export type Viewport2DChildrenArgs = {
   /** Camera state. `pan` is in screen pixels; `scale` is world->screen. */
@@ -56,6 +57,9 @@ export type Viewport2DProps = {
 
   /** Optional imperative controller for external toolbars. */
   controllerRef?: React.RefObject<Viewport2DController | null>;
+
+  /** 交互配置（平移/缩放等）。不传则使用默认交互。 */
+  interactions?: ViewportInteractionMode;
 };
 
 /**
@@ -80,6 +84,7 @@ export function Viewport2D(props: Viewport2DProps) {
     style,
     children,
     overlay,
+    interactions,
   } = props;
 
   const viewportRef = useRef<HTMLDivElement | null>(null);
@@ -92,6 +97,7 @@ export function Viewport2D(props: Viewport2DProps) {
     maxScaleFactor,
     wheelZoomSpeed,
     wheelPanSpeed,
+    interactionMode: interactions,
   });
 
   // Expose imperative controller.
@@ -142,7 +148,17 @@ export function Viewport2D(props: Viewport2DProps) {
       onPointerMove={handlers.onPointerMove}
       onPointerUp={handlers.onPointerUp}
       onPointerCancel={handlers.onPointerCancel}
-      onWheelCapture={handlers.onWheel}
+      onWheelCapture={(e) => {
+        const like: ViewportWheelEventLike = {
+          ctrlKey: e.ctrlKey,
+          deltaX: e.deltaX,
+          deltaY: e.deltaY,
+          clientX: e.clientX,
+          clientY: e.clientY,
+          preventDefault: () => e.preventDefault(),
+        };
+        handlers.onWheel(like);
+      }}
     >
       {/* transformed content (world space) */}
       <div

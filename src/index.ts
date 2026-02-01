@@ -13,5 +13,36 @@ export {
   worldToScreen,
   zoomAtScreenPoint,
 } from './viewportMath';
+
+export type { CameraConstraints } from './constraints';
+export { constrainCamera } from './constraints';
+
+export type { SerializedCamera2D, ViewportController } from './controller';
+export { serializeCamera, deserializeCamera, createViewportController } from './controller';
+
+export type { AnimateCameraOptions, EasingFn } from './animation';
+export { animateCamera, easeInOutCubic, easeOutCubic } from './animation';
+
+export {
+  applyCameraToCanvas2D,
+  cameraToSvgMatrix,
+  getHiDpiCanvasPixelSize,
+  getVisibleWorldBox,
+  normalizeViewportPxRect,
+  screenDeltaToWorldDelta,
+} from './renderers';
+
+export {
+  createViewportInteractions,
+} from './interactions';
+export type {
+  CreateViewportInteractionsOptions,
+  ViewportCameraApi,
+  ViewportInteractionMode,
+  ViewportPointerEventLike,
+  ViewportRect,
+  ViewportWheelEventLike,
+} from './interactions';
+
 export { useViewportCamera } from './useViewportCamera';
 export type { UseViewportCameraOptions } from './useViewportCamera';

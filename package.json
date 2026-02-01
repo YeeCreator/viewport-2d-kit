@@ -1,5 +1,5 @@
 {
-  "name": "@chess-games/viewport-kit",
+  "name": "viewport-kit",
   "version": "0.1.0",
   "private": true,
   "type": "module",
