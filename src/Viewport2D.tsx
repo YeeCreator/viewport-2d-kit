@@ -38,10 +38,18 @@ export type Viewport2DProps = {
   style?: React.CSSProperties;
 
   /**
-   * If false, disables single-pointer drag-to-pan so the content can handle left-drag gestures (e.g. drawing).
+   * If false, disables single-pointer drag-to-pan so the content can handle left-drag gestures (e.g. board interactions).
    * Default true.
    */
   allowDragPan?: boolean;
+
+  /**
+   * If false, Viewport2D will not attach pointer event handlers to the container.
+   * This guarantees that mouse/touch gestures are handled by the content layer.
+   *
+   * Default true.
+   */
+  allowPointerPan?: boolean;
 
   /**
    * Render function. The returned nodes will be placed inside the transformed content layer.
@@ -92,6 +100,7 @@ export function Viewport2D(props: Viewport2DProps) {
     overlay,
     interactions,
     allowDragPan = true,
+    allowPointerPan = true,
   } = props;
 
   const viewportRef = useRef<HTMLDivElement | null>(null);
@@ -162,10 +171,10 @@ export function Viewport2D(props: Viewport2DProps) {
         background,
         ...style,
       }}
-      onPointerDown={handlers.onPointerDown}
-      onPointerMove={handlers.onPointerMove}
-      onPointerUp={handlers.onPointerUp}
-      onPointerCancel={handlers.onPointerCancel}
+      onPointerDown={allowPointerPan ? handlers.onPointerDown : undefined}
+      onPointerMove={allowPointerPan ? handlers.onPointerMove : undefined}
+      onPointerUp={allowPointerPan ? handlers.onPointerUp : undefined}
+      onPointerCancel={allowPointerPan ? handlers.onPointerCancel : undefined}
       onWheelCapture={(e) => {
         const like: ViewportWheelEventLike = {
           ctrlKey: e.ctrlKey,

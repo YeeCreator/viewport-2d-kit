@@ -98,6 +98,10 @@ export function createViewportInteractions(opts: CreateViewportInteractionsOptio
   };
 
   const onPointerDown = (e: ViewportPointerEventLike) => {
+    // If drag-pan is disabled, don't hijack pointer events.
+    // Let the game/content handle taps/clicks/drags.
+    if (!mode.dragPan && !mode.pinchZoom) return;
+
     e.preventDefault();
     e.currentTarget.setPointerCapture?.(e.pointerId);
 
@@ -123,16 +127,20 @@ export function createViewportInteractions(opts: CreateViewportInteractionsOptio
   };
 
   const onPointerUp = (e: ViewportPointerEventLike) => {
+    if (!mode.dragPan && !mode.pinchZoom) return;
     e.preventDefault();
     endPointer(e.pointerId);
   };
 
   const onPointerCancel = (e: ViewportPointerEventLike) => {
+    if (!mode.dragPan && !mode.pinchZoom) return;
     e.preventDefault();
     endPointer(e.pointerId);
   };
 
   const onPointerMove = (e: ViewportPointerEventLike) => {
+    if (!mode.dragPan && !mode.pinchZoom) return;
+
     e.preventDefault();
 
     const prev = pointers.get(e.pointerId);
