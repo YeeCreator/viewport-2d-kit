@@ -38,6 +38,12 @@ export type Viewport2DProps = {
   style?: React.CSSProperties;
 
   /**
+   * If false, disables single-pointer drag-to-pan so the content can handle left-drag gestures (e.g. drawing).
+   * Default true.
+   */
+  allowDragPan?: boolean;
+
+  /**
    * Render function. The returned nodes will be placed inside the transformed content layer.
    *
    * Important: Children should be written in world coordinates (e.g. SVG viewBox coords).
@@ -85,6 +91,7 @@ export function Viewport2D(props: Viewport2DProps) {
     children,
     overlay,
     interactions,
+    allowDragPan = true,
   } = props;
 
   const viewportRef = useRef<HTMLDivElement | null>(null);
@@ -97,18 +104,29 @@ export function Viewport2D(props: Viewport2DProps) {
     maxScaleFactor,
     wheelZoomSpeed,
     wheelPanSpeed,
-    interactionMode: interactions,
+    interactionMode: {
+      ...interactions,
+      dragPan: allowDragPan && (interactions?.dragPan ?? true),
+    },
   });
 
   // Expose imperative controller.
   React.useEffect(() => {
     const ref = props.controllerRef;
     if (!ref) return;
-    ref.current = {
-      fitToCenter,
-      getCamera: () => camera,
-      setCamera: (next) => setCamera(next),
-    };
+
+    if (ref.current) {
+      ref.current.fitToCenter = fitToCenter;
+      ref.current.getCamera = () => camera;
+      ref.current.setCamera = (next) => setCamera(next);
+    } else {
+      ref.current = {
+        fitToCenter,
+        getCamera: () => camera,
+        setCamera: (next) => setCamera(next),
+      };
+    }
+
     return () => {
       if (ref.current) ref.current = null;
     };
