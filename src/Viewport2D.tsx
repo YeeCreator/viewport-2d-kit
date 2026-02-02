@@ -74,6 +74,16 @@ export type Viewport2DProps = {
 
   /** 交互配置（平移/缩放等）。不传则使用默认交互。 */
   interactions?: ViewportInteractionMode;
+
+  /**
+   * Hold-to-pan behavior: when enabled, drag-to-pan only works while the user is holding Space.
+   * This keeps left-click gestures available for the content (board interactions) by default.
+   *
+   * - Wheel pan/zoom is unaffected.
+   * - Default: 'space' (enabled).
+   * - Set to 'none' to use classic "always drag-pan".
+   */
+  holdToPanKey?: 'space' | 'none';
 };
 
 /**
@@ -101,9 +111,45 @@ export function Viewport2D(props: Viewport2DProps) {
     interactions,
     allowDragPan = true,
     allowPointerPan = true,
+    holdToPanKey = 'space',
   } = props;
 
   const viewportRef = useRef<HTMLDivElement | null>(null);
+
+  const spaceDownRef = useRef(false);
+  React.useEffect(() => {
+    if (holdToPanKey !== 'space') return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space') spaceDownRef.current = true;
+    };
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space') spaceDownRef.current = false;
+    };
+    const onBlur = () => {
+      spaceDownRef.current = false;
+    };
+
+    window.addEventListener('keydown', onKeyDown, true);
+    window.addEventListener('keyup', onKeyUp, true);
+    window.addEventListener('blur', onBlur);
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown, true);
+      window.removeEventListener('keyup', onKeyUp, true);
+      window.removeEventListener('blur', onBlur);
+    };
+  }, [holdToPanKey]);
+
+  const navModeActive = holdToPanKey === 'none' ? true : spaceDownRef.current;
+  const effectiveAllowDragPan = allowDragPan && navModeActive;
+
+  // Important: If we still attach pointer handlers while dragPan is "off",
+  // `createViewportInteractions` can still call preventDefault/setPointerCapture for pinchZoom,
+  // hijacking clicks from the underlying content.
+  //
+  // So in hold-to-pan mode, we only attach pointer handlers while nav mode is active.
+  const effectiveAllowPointerHandlers = allowPointerPan && navModeActive;
 
   const { camera, fitToCenter, handlers, setCamera } = useViewportCamera({
     containerRef: viewportRef,
@@ -115,7 +161,7 @@ export function Viewport2D(props: Viewport2DProps) {
     wheelPanSpeed,
     interactionMode: {
       ...interactions,
-      dragPan: allowDragPan && (interactions?.dragPan ?? true),
+      dragPan: effectiveAllowDragPan && (interactions?.dragPan ?? true),
     },
   });
 
@@ -171,10 +217,10 @@ export function Viewport2D(props: Viewport2DProps) {
         background,
         ...style,
       }}
-      onPointerDown={allowPointerPan ? handlers.onPointerDown : undefined}
-      onPointerMove={allowPointerPan ? handlers.onPointerMove : undefined}
-      onPointerUp={allowPointerPan ? handlers.onPointerUp : undefined}
-      onPointerCancel={allowPointerPan ? handlers.onPointerCancel : undefined}
+      onPointerDown={effectiveAllowPointerHandlers ? handlers.onPointerDown : undefined}
+      onPointerMove={effectiveAllowPointerHandlers ? handlers.onPointerMove : undefined}
+      onPointerUp={effectiveAllowPointerHandlers ? handlers.onPointerUp : undefined}
+      onPointerCancel={effectiveAllowPointerHandlers ? handlers.onPointerCancel : undefined}
       onWheelCapture={(e) => {
         const like: ViewportWheelEventLike = {
           ctrlKey: e.ctrlKey,
@@ -200,7 +246,7 @@ export function Viewport2D(props: Viewport2DProps) {
       </div>
 
       {/* fixed overlay (screen space) */}
-      {overlayNode ? <div style={{ position: 'absolute', inset: 0 }}>{overlayNode}</div> : null}
+      {overlayNode ? <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>{overlayNode}</div> : null}
     </div>
   );
 }

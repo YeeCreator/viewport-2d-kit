@@ -95,6 +95,20 @@ import {
   - `pan` 以 **屏幕像素** 为单位
   - `scale` 为 **世界 -> 屏幕** 的缩放
 
+## 重要注意事项
+
+### overlay 默认不拦截交互
+
+`Viewport2D` 的 overlay 会渲染在最上层（`position:absolute; inset:0`）。为避免覆盖底层内容层（canvas/svg）导致点击失效，
+本库默认让 overlay 容器 `pointer-events: none`。
+
+如果你的业务确实需要“在屏幕空间捕获 pointer 事件”（例如：棋盘游戏的点击落子需要按 camera 做 screen→world 映射），
+请在你传入的 overlay 节点上显式设置：
+
+- `style={{ pointerEvents: 'auto' }}`
+
+这样既不会影响默认行为，也能实现可控的交互层。
+
 ## `Viewport2D`（React 组件）
 
 `Viewport2D` 提供经过变换的内容层以及指针 / 滚轮交互：
