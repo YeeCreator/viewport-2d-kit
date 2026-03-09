@@ -2,6 +2,17 @@
 
 > 记录每一次功能新增/改动/修复的摘要，便于回溯。
 
+## 2026-03-05
+
+### 新增：coordinateAdapters（承接业务仓库坐标迁移）
+
+- 新增 `src/coordinateAdapters.ts`，统一输出以下能力：
+  - legacy 相机互转：`camera2DToLegacy`、`legacyToCamera2D`
+  - 容器坐标换算：`clientToLocalCssPoint`、`localCssToWorld`、`worldToLocalCss`、`worldToLocalCssWithScroll`
+  - canvas 映射工具：`getDprScaleFromCanvas`、`localCssPxToCanvasPx`、`canvasPxToLocalCssPx`
+- 在 `src/index.ts` 对外导出上述类型和函数，供依赖项目直接复用。
+- 目标：减少消费者项目重复实现，统一坐标语义与迁移口径。
+
 ## 2026-02-02
 
 ### Viewport2D：overlay 不拦截交互（避免覆盖棋盘点击）

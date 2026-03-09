@@ -34,6 +34,20 @@
 - `src/interactions.ts`：交互策略（drag-pan, pinch/ctrl+wheel zoom 等）
 - `src/controller.ts`：命令式控制器（动画、zoomIn/zoomOut 等）
 - `src/preventPageZoom.ts`：可选：防页面缩放（游戏式交互场景）
+- `src/coordinateAdapters.ts`：跨项目迁移适配工具（legacy 相机互转、wrap 本地 CSS 坐标换算、canvas DPR 映射）
+
+## 3.1 coordinateAdapters 设计边界
+
+`coordinateAdapters` 用于承载“坐标语义转换”和“旧项目迁移兼容”能力，避免业务仓库重复维护同类工具。
+
+- 包含：
+	- `camera2DToLegacy` / `legacyToCamera2D`
+	- `clientToLocalCssPoint` / `localCssToWorld` / `worldToLocalCss`
+	- `worldToLocalCssWithScroll`（过渡兼容）
+	- `getDprScaleFromCanvas` / `localCssPxToCanvasPx` / `canvasPxToLocalCssPx`
+- 不包含：
+	- 业务领域对象（cell/edge/formula）
+	- 具体应用交互状态机
 
 ## 4. 关于 overlay 是否可交互（非常重要）
 

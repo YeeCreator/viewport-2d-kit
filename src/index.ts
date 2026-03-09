@@ -46,3 +46,19 @@ export type {
 
 export { useViewportCamera } from './useViewportCamera';
 export type { UseViewportCameraOptions } from './useViewportCamera';
+
+export type { LegacyCamera, CssPoint, WorldPoint } from './coordinateAdapters';
+export {
+  camera2DToLegacy,
+  legacyToCamera2D,
+  getDprScaleFromCanvas,
+  localCssPxToCanvasPx,
+  canvasPxToLocalCssPx,
+  clientToLocalCssPoint,
+  localCssToWorkspaceCss,
+  workspaceCssToLocalCss,
+  worldToWorkspaceCss,
+  localCssToWorld,
+  worldToLocalCss,
+  worldToLocalCssWithScroll,
+} from './coordinateAdapters';

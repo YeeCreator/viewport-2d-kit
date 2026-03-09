@@ -24,6 +24,19 @@ export type ViewportRect = { left: number; top: number; width: number; height: n
 export type ViewportInteractionMode = {
   /** 是否启用拖拽平移（单指/鼠标）。默认 true。 */
   dragPan?: boolean;
+  /**
+   * 可选：是否允许本次 pointerDown 触发 drag-pan。
+   *
+   * 设计目的：
+   * - 库本身不应该理解业务（例如“空格+左键才允许平移”这类规则）；
+   * - 但库需要提供一个通用钩子，让宿主按自己的规则决定是否把本次指针交互用于平移。
+   *
+   * 用法示例（Matheshop）：
+   * - 中键拖拽 => 返回 true
+   * - 空格按住 + 左键拖拽 => 返回 true
+   * - 普通左键拖拽（用于拖动节点/框选）=> 返回 false
+   */
+  dragPanCondition?: (e: ViewportPointerEventLike) => boolean;
   /** 是否启用双指/触控板滚动平移（wheel）。默认 true。 */
   wheelPan?: boolean;
   /** 是否启用 ctrl+wheel 缩放。默认 true。 */
@@ -44,7 +57,7 @@ export type ViewportInteractionMode = {
   wheelZoomAnchor?: 'center' | 'cursor';
 };
 
-type PointerState = { id: number; pt: Vec2 };
+type PointerState = { id: number; pt: Vec2; allowDragPan: boolean };
 
 export type ViewportCameraApi = {
   get: () => Camera2D;
@@ -78,7 +91,9 @@ export function createViewportInteractions(opts: CreateViewportInteractionsOptio
     onZoom,
   } = opts;
 
-  const mode: Required<ViewportInteractionMode> = {
+  const mode: Required<Omit<ViewportInteractionMode, 'dragPanCondition'>> & {
+    dragPanCondition?: (e: ViewportPointerEventLike) => boolean
+  } = {
     dragPan: true,
     wheelPan: true,
     ctrlWheelZoom: true,
@@ -102,13 +117,18 @@ export function createViewportInteractions(opts: CreateViewportInteractionsOptio
     // Let the game/content handle taps/clicks/drags.
     if (!mode.dragPan && !mode.pinchZoom) return;
 
+    // 如果宿主提供了条件，则本次是否允许 drag-pan 由宿主决定。
+    // 注意：pinchZoom 仍允许记录 pointers，以便触屏双指缩放。
+    const allowDragPan = mode.dragPan && (mode.dragPanCondition ? mode.dragPanCondition(e) : true);
+    if (!allowDragPan && !mode.pinchZoom) return;
+
     e.preventDefault();
     e.currentTarget.setPointerCapture?.(e.pointerId);
 
     const pt = toLocal(e.clientX, e.clientY);
     if (!pt) return;
 
-    pointers.set(e.pointerId, { id: e.pointerId, pt });
+    pointers.set(e.pointerId, { id: e.pointerId, pt, allowDragPan });
 
     if (pointers.size < 2) {
       lastPinchDistance = null;
@@ -117,7 +137,7 @@ export function createViewportInteractions(opts: CreateViewportInteractionsOptio
       lastPinchDistance = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
     }
 
-    if (pointers.size === 1 && mode.dragPan) onPanStart?.();
+    if (pointers.size === 1 && allowDragPan) onPanStart?.();
   };
 
   const endPointer = (pointerId: number) => {
@@ -149,12 +169,12 @@ export function createViewportInteractions(opts: CreateViewportInteractionsOptio
     const pt = toLocal(e.clientX, e.clientY);
     if (!pt) return;
 
-    pointers.set(e.pointerId, { id: e.pointerId, pt });
+    pointers.set(e.pointerId, { id: e.pointerId, pt, allowDragPan: prev.allowDragPan });
 
     const all = Array.from(pointers.values());
     const pts = all.map((p) => p.pt);
 
-    if (pts.length === 1 && mode.dragPan) {
+    if (pts.length === 1 && prev.allowDragPan) {
       const dx = pt.x - prev.pt.x;
       const dy = pt.y - prev.pt.y;
       if (dx === 0 && dy === 0) return;
