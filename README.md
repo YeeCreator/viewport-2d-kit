@@ -86,6 +86,18 @@ import {
 } from 'viewport-kit';
 ```
 
+## 入口分层
+
+- 核心入口（推荐默认）：`viewport-kit` 或 `viewport-kit/core`
+- 可选 UI 入口：`viewport-kit/ui`
+
+`viewport-kit/ui` 依赖：
+- `@radix-ui/react-toolbar`
+- `@radix-ui/react-dropdown-menu`
+- `@radix-ui/react-context-menu`
+
+示例代码见：`docs/示例集成.md`
+
 ## 核心概念
 
 - 世界空间（World space）：你内容的坐标系（游戏地图、绘图画布、棋盘等）

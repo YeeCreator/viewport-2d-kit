@@ -36,6 +36,17 @@
 - `src/preventPageZoom.ts`：可选：防页面缩放（游戏式交互场景）
 - `src/coordinateAdapters.ts`：跨项目迁移适配工具（legacy 相机互转、wrap 本地 CSS 坐标换算、canvas DPR 映射）
 
+## 3.2 入口分层（core / ui）
+
+- `src/index.ts`：默认入口，当前与 `core` 保持等价（纯核心能力）。
+- `src/core.ts`：核心子入口，对外路径为 `viewport-kit/core`。
+- `src/ui.ts`：UI 子入口，对外路径为 `viewport-kit/ui`。
+- `src/ui/*`：基于 Radix 的可选外围 UI 组件（工具栏、右键菜单、状态栏）。
+
+设计约束：
+- 核心入口不依赖 Radix。
+- UI 依赖通过 `peerDependencies` 可选声明，避免污染仅核心使用者的安装与包体。
+
 ## 3.1 coordinateAdapters 设计边界
 
 `coordinateAdapters` 用于承载“坐标语义转换”和“旧项目迁移兼容”能力，避免业务仓库重复维护同类工具。
@@ -67,6 +78,8 @@
 - `pnpm dev`（tsup --watch）
 - `pnpm build`
 - `pnpm typecheck`
+
+构建产物将包含：`dist/index.*`、`dist/core.*`、`dist/ui.*`。
 
 ## 6. 作为 file 依赖被引用时
 
