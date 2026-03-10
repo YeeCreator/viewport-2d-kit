@@ -28,7 +28,7 @@
 ### 依赖与包体策略
 
 - `@radix-ui/react-toolbar`、`@radix-ui/react-dropdown-menu`、`@radix-ui/react-context-menu` 以可选 `peerDependencies` 方式声明。
-- 核心入口不绑定 Radix，使用者按需安装并从 `viewport-kit/ui` 引入。
+- 核心入口不绑定 Radix，使用者按需安装并从 `2d-viewport-kit/ui` 引入。
 
 ### 文档与示例
 

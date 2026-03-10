@@ -2,14 +2,14 @@
 
 ## 包入口
 
-- 根入口：`viewport-kit`
-  - 与 `viewport-kit/core` 等价，导出纯 2D 视口核心能力。
-- 核心入口：`viewport-kit/core`
+- 根入口：`2d-viewport-kit`
+  - 与 `2d-viewport-kit/core` 等价，导出纯 2D 视口核心能力。
+- 核心入口：`2d-viewport-kit/core`
   - 仅包含相机、交互、约束、渲染辅助与 React 视口组件，不包含 Radix UI 组件。
-- UI 入口：`viewport-kit/ui`
+- UI 入口：`2d-viewport-kit/ui`
   - 导出可选的 Radix UI 外围组件，不会自动注入到核心入口。
 
-## 核心入口（`viewport-kit` / `viewport-kit/core`）
+## 核心入口（`2d-viewport-kit` / `2d-viewport-kit/core`）
 
 ### `Viewport2D`
 
@@ -61,7 +61,7 @@
 - `worldToLocalCssWithScroll`
 - 其余 `coordinateAdapters` 导出函数
 
-## UI 入口（`viewport-kit/ui`）
+## UI 入口（`2d-viewport-kit/ui`）
 
 > 依赖：`@radix-ui/react-toolbar`、`@radix-ui/react-dropdown-menu`、`@radix-ui/react-context-menu`。
 

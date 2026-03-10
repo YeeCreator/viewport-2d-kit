@@ -1,10 +1,10 @@
-# 开发者指南（viewport-kit）
+# 开发者指南（2d-viewport-kit）
 
-> 本文档面向需要维护/扩展 `viewport-kit` 的开发者。
+> 本文档面向需要维护/扩展 `2d-viewport-kit` 的开发者。
 
 ## 1. 目标与定位
 
-`viewport-kit` 提供一个通用的 2D 视口（Viewport）能力：
+`2d-viewport-kit` 提供一个通用的 2D 视口（Viewport）能力：
 
 - 平移（pan）
 - 缩放（zoom）
@@ -39,8 +39,8 @@
 ## 3.2 入口分层（core / ui）
 
 - `src/index.ts`：默认入口，当前与 `core` 保持等价（纯核心能力）。
-- `src/core.ts`：核心子入口，对外路径为 `viewport-kit/core`。
-- `src/ui.ts`：UI 子入口，对外路径为 `viewport-kit/ui`。
+- `src/core.ts`：核心子入口，对外路径为 `2d-viewport-kit/core`。
+- `src/ui.ts`：UI 子入口，对外路径为 `2d-viewport-kit/ui`。
 - `src/ui/*`：基于 Radix 的可选外围 UI 组件（工具栏、右键菜单、状态栏）。
 
 设计约束：

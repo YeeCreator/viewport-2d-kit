@@ -3,7 +3,7 @@
  *
  * @example
  * ```ts
- * import { ViewportToolbar } from 'viewport-kit/ui';
+ * import { ViewportToolbar } from '2d-viewport-kit/ui';
  * ```
  */
 export * from './ui/index';
