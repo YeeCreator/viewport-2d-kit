@@ -26,6 +26,8 @@ export type ViewportModeController = {
   zoomOut: (factor?: number) => void;
   /** 按绝对值缩放。 */
   zoomTo: (scale: number, opts?: { anchorScreen?: Vec2 }) => void;
+  /** 动画过渡到目标相机。 */
+  animateToCamera: (target: Camera2D, opts?: { durationMs?: number; signal?: AbortSignal }) => Promise<void>;
 };
 
 /**

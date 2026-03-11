@@ -4,7 +4,7 @@ import type { InfiniteViewerRef } from 'react-infinite-viewer';
 import type { Camera2D } from '../../viewportMath';
 import { clamp } from '../../viewportMath';
 import { createLiteModeController } from './createLiteModeController';
-import type { ViewportLiteProps } from './types';
+import type { ViewportLiteProps, ViewportLiteRenderArgs } from './types';
 
 /**
  * 轻量视口组件（react-infinite-viewer 适配层）。
@@ -25,8 +25,12 @@ export function ViewportLite(props: ViewportLiteProps) {
     minScale = 0.25,
     maxScale = 8,
     zoomStep = 0.1,
+    paddingPx = 12,
+    autoFitOnViewBoxChange = true,
     style,
     onCamera,
+    controllerRef,
+    overlay,
     children,
   } = props;
 
@@ -43,6 +47,11 @@ export function ViewportLite(props: ViewportLiteProps) {
       scale: clamp(initial.scale, minScale, maxScale),
     };
   });
+  const cameraRef = React.useRef<Camera2D>(camera);
+
+  React.useEffect(() => {
+    cameraRef.current = camera;
+  }, [camera]);
 
   /**
    * 读取当前容器尺寸。
@@ -59,14 +68,15 @@ export function ViewportLite(props: ViewportLiteProps) {
     () =>
       createLiteModeController({
         viewerRef,
-        getCamera: () => camera,
+        getCamera: () => cameraRef.current,
         setCamera,
         getViewportSize,
         viewBox,
         minScale,
         maxScale,
+        paddingPx,
       }),
-    [camera, getViewportSize, maxScale, minScale, viewBox]
+    [getViewportSize, maxScale, minScale, paddingPx, viewBox]
   );
 
   React.useEffect(() => {
@@ -74,9 +84,21 @@ export function ViewportLite(props: ViewportLiteProps) {
   }, [camera, onCamera]);
 
   React.useEffect(() => {
+    if (!autoFitOnViewBoxChange) return;
     controller.fitToCenter();
     // 仅在 viewBox 改变后重置。
-  }, [controller, viewBox.height, viewBox.width, viewBox.x, viewBox.y]);
+  }, [autoFitOnViewBoxChange, controller, viewBox.height, viewBox.width, viewBox.x, viewBox.y]);
+
+  // 对外暴露 controller，便于与旧工具栏/快捷键逻辑对接。
+  React.useEffect(() => {
+    if (!controllerRef) return;
+    controllerRef.current = controller;
+    return () => {
+      if (controllerRef.current === controller) {
+        controllerRef.current = null;
+      }
+    };
+  }, [controller, controllerRef]);
 
   /**
    * 处理 scroll 事件，同步 pan。
@@ -84,14 +106,13 @@ export function ViewportLite(props: ViewportLiteProps) {
    * @param event 事件对象。
    */
   const handleScroll = (event: { scrollLeft?: number; scrollTop?: number }) => {
-    const next: Camera2D = {
-      ...camera,
+    setCamera((prev) => ({
+      ...prev,
       pan: {
-        x: event.scrollLeft ?? camera.pan.x,
-        y: event.scrollTop ?? camera.pan.y,
+        x: event.scrollLeft ?? prev.pan.x,
+        y: event.scrollTop ?? prev.pan.y,
       },
-    };
-    setCamera(next);
+    }));
   };
 
   /**
@@ -100,10 +121,20 @@ export function ViewportLite(props: ViewportLiteProps) {
    * @param event 事件对象。
    */
   const handlePinch = (event: { zoom?: number }) => {
-    const nextScale = clamp(event.zoom ?? camera.scale, minScale, maxScale);
-    if (nextScale === camera.scale) return;
-    setCamera({ ...camera, scale: nextScale });
+    setCamera((prev) => {
+      const nextScale = clamp(event.zoom ?? prev.scale, minScale, maxScale);
+      if (nextScale === prev.scale) return prev;
+      return { ...prev, scale: nextScale };
+    });
   };
+
+  const renderArgs: ViewportLiteRenderArgs = {
+    camera,
+    fitToCenter: controller.fitToCenter,
+  };
+
+  const content = typeof children === 'function' ? children(renderArgs) : children;
+  const overlayNode = typeof overlay === 'function' ? overlay(renderArgs) : overlay;
 
   const InfiniteViewerAny = InfiniteViewer as any;
 
@@ -131,8 +162,9 @@ export function ViewportLite(props: ViewportLiteProps) {
         onPinch={handlePinch}
         style={{ width: '100%', height: '100%' }}
       >
-        {children}
+        {content}
       </InfiniteViewerAny>
+      {overlayNode ? <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>{overlayNode}</div> : null}
     </div>
   );
 }

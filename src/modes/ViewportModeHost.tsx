@@ -10,9 +10,11 @@ export type ViewportModeHostProps = {
   /** 模式。 */
   mode: ViewportModeKind;
   /** lite 模式属性。 */
-  liteProps: ViewportLiteProps;
+  liteProps?: ViewportLiteProps;
   /** game/map 场景渲染器。 */
   renderPixiMode?: (mode: 'game' | 'map') => React.ReactNode;
+  /** 可选：未命中渲染器时的兜底内容。 */
+  fallback?: React.ReactNode;
 };
 
 /**
@@ -23,11 +25,18 @@ export type ViewportModeHostProps = {
  */
 export function ViewportModeHost(props: ViewportModeHostProps) {
   if (props.mode === 'lite') {
+    if (!props.liteProps) {
+      return <div>mode=lite 时必须传入 liteProps。</div>;
+    }
     return <ViewportLite {...props.liteProps} />;
   }
 
   if (props.renderPixiMode) {
     return <>{props.renderPixiMode(props.mode)}</>;
+  }
+
+  if (props.fallback) {
+    return <>{props.fallback}</>;
   }
 
   return (

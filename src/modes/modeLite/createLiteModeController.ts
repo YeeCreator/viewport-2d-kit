@@ -2,6 +2,7 @@ import type { RefObject } from 'react';
 import type { InfiniteViewerRef } from 'react-infinite-viewer';
 import type { Camera2D, Vec2 } from '../../viewportMath';
 import { clamp, fitCameraToViewBox, zoomAtScreenPoint } from '../../viewportMath';
+import { animateCamera } from '../../animation';
 import type { ViewportLiteController } from './types';
 
 /**
@@ -22,6 +23,8 @@ export type CreateLiteModeControllerArgs = {
   minScale: number;
   /** 最大缩放。 */
   maxScale: number;
+  /** fit 内边距。 */
+  paddingPx?: number;
 };
 
 /**
@@ -77,7 +80,7 @@ export function createLiteModeController(args: CreateLiteModeControllerArgs): Vi
     const fit = fitCameraToViewBox({
       containerPx: viewportSize,
       viewBox: args.viewBox,
-      paddingPx: 12,
+      paddingPx: args.paddingPx ?? 12,
     });
 
     writeCamera(fit);
@@ -124,6 +127,22 @@ export function createLiteModeController(args: CreateLiteModeControllerArgs): Vi
     zoomTo(current.scale / factor);
   };
 
+  /**
+   * 动画过渡到目标相机。
+   *
+   * @param target 目标相机。
+   * @param opts 可选动画参数。
+   * @returns 动画完成 Promise。
+   */
+  const animateToCameraFn = (target: Camera2D, opts?: { durationMs?: number; signal?: AbortSignal }) => {
+    return animateCamera({
+      get: args.getCamera,
+      set: writeCamera,
+      to: constrain(target),
+      options: { durationMs: opts?.durationMs, signal: opts?.signal },
+    });
+  };
+
   return {
     getCamera: args.getCamera,
     setCamera: writeCamera,
@@ -131,5 +150,6 @@ export function createLiteModeController(args: CreateLiteModeControllerArgs): Vi
     zoomIn,
     zoomOut,
     zoomTo,
+    animateToCamera: animateToCameraFn,
   };
 }

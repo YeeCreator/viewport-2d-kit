@@ -1,5 +1,15 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, ReactNode, RefObject } from 'react';
 import type { Camera2D, Vec2, ViewBox } from '../../viewportMath';
+
+/**
+ * 轻量模式渲染参数。
+ */
+export type ViewportLiteRenderArgs = {
+  /** 当前相机。 */
+  camera: Camera2D;
+  /** 居中适配。 */
+  fitToCenter: () => void;
+};
 
 /**
  * 轻量模式组件属性。
@@ -21,12 +31,20 @@ export type ViewportLiteProps = {
   maxScale?: number;
   /** 缩放步长。 */
   zoomStep?: number;
+  /** fit 计算内边距。 */
+  paddingPx?: number;
+  /** viewBox 变化时是否自动 fit。 */
+  autoFitOnViewBoxChange?: boolean;
   /** 样式。 */
   style?: CSSProperties;
   /** 相机变化回调。 */
   onCamera?: (camera: Camera2D) => void;
+  /** 可选：外部控制器引用。 */
+  controllerRef?: RefObject<ViewportLiteController | null>;
+  /** 固定在屏幕坐标系的覆盖层。 */
+  overlay?: ReactNode | ((args: ViewportLiteRenderArgs) => ReactNode);
   /** 子元素。 */
-  children?: ReactNode;
+  children?: ReactNode | ((args: ViewportLiteRenderArgs) => ReactNode);
 };
 
 /**
@@ -45,4 +63,6 @@ export type ViewportLiteController = {
   zoomOut: (factor?: number) => void;
   /** 绝对缩放。 */
   zoomTo: (scale: number, opts?: { anchorScreen?: Vec2 }) => void;
+  /** 动画过渡到目标相机。 */
+  animateToCamera: (target: Camera2D, opts?: { durationMs?: number; signal?: AbortSignal }) => Promise<void>;
 };

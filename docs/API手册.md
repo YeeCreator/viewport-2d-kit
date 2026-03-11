@@ -36,8 +36,9 @@
 
 字段：
 - `mode: 'lite' | 'game' | 'map'`
-- `liteProps: ViewportLiteProps`
+- `liteProps?: ViewportLiteProps`
 - `renderPixiMode?: (mode: 'game' | 'map') => React.ReactNode`
+- `fallback?: React.ReactNode`
 
 ### 轻量模式（`mode-lite`）
 
@@ -55,9 +56,13 @@
 - `minScale?: number`
 - `maxScale?: number`
 - `zoomStep?: number`
+- `paddingPx?: number`
+- `autoFitOnViewBoxChange?: boolean`
 - `style?: CSSProperties`
 - `onCamera?: (camera: Camera2D) => void`
-- `children?: ReactNode`
+- `controllerRef?: RefObject<ViewportLiteController | null>`
+- `overlay?: ReactNode | ((args: ViewportLiteRenderArgs) => ReactNode)`
+- `children?: ReactNode | ((args: ViewportLiteRenderArgs) => ReactNode)`
 
 `ViewportLiteController` 字段：
 - `getCamera: () => Camera2D`
@@ -66,6 +71,7 @@
 - `zoomIn: (factor?: number) => void`
 - `zoomOut: (factor?: number) => void`
 - `zoomTo: (scale: number, opts?: { anchorScreen?: Vec2 }) => void`
+- `animateToCamera: (target: Camera2D, opts?: { durationMs?: number; signal?: AbortSignal }) => Promise<void>`
 
 ### 游戏/地图模式（`mode-game` / `mode-map`）
 

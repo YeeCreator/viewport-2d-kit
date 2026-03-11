@@ -4,6 +4,31 @@
 
 ## 2026-03-11
 
+### 第二轮补全：mode-lite 迁移能力增强 + 调试验证通过
+
+本轮围绕“兼容映射表”和“弃用批次计划”补齐剩余关键能力。
+
+代码补全：
+
+1. `ViewportLite` 新增：
+  - `overlay`（支持固定屏幕层）
+  - `controllerRef`（便于复用旧工具栏控制逻辑）
+  - `paddingPx`、`autoFitOnViewBoxChange`
+2. `createLiteModeController` 新增：
+  - `animateToCamera` 动画控制
+3. `ViewportModeHost` 新增：
+  - `liteProps` 可选
+  - `fallback` 兜底渲染
+4. 新增模式化示例：
+  - `docs/examples/lite-basic-example.tsx`
+  - `docs/examples/mode-host-example.tsx`
+
+调试验证：
+
+1. `pnpm typecheck` 通过。
+2. `pnpm build` 通过。
+3. `dist` 产物已生成模式化入口与类型声明。
+
 ### 阶段进展：2D 视口引擎切换（第一轮）
 
 本次改造对齐 `.github/docs/design/design-2d-viewport-engine-strategy-20260311-001.md` 与 `.github/docs/plan/plan-2d-viewport-engine-switch-20260311-001.md`。
