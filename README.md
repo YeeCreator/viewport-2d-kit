@@ -74,6 +74,9 @@
 ```ts
 import {
   Viewport2D,
+   ViewportLite,
+   ViewportModeHost,
+   resolveViewportEngine,
   createViewportController,
   type ViewportController,
   type ViewportInteractionMode,
@@ -86,9 +89,32 @@ import {
 } from '2d-viewport-kit';
 ```
 
+## 模式化引擎策略（2026-03）
+
+- `lite` 场景：`react-infinite-viewer`
+- `game/map` 场景：`pixi-viewport`
+
+推荐：
+
+```ts
+import { ViewportLite, resolveViewportEngine } from '2d-viewport-kit';
+
+const liteEngine = resolveViewportEngine('lite');
+// liteEngine.engine === 'react-infinite-viewer'
+```
+
+兼容说明：
+
+- `Viewport2D`（自研内核）目前保留为兼容层。
+- 新需求建议优先使用 `ViewportLite` 或 `ViewportModeHost`。
+
 ## 入口分层
 
 - 核心入口（推荐默认）：`2d-viewport-kit` 或 `2d-viewport-kit/core`
+- 模式入口：`2d-viewport-kit/modes`
+- 轻量模式入口：`2d-viewport-kit/mode-lite`
+- 游戏模式入口：`2d-viewport-kit/mode-game`
+- 地图模式入口：`2d-viewport-kit/mode-map`
 - 可选 UI 入口：`2d-viewport-kit/ui`
 
 `2d-viewport-kit/ui` 依赖：

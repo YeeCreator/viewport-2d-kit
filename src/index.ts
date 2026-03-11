@@ -1,3 +1,8 @@
+/**
+ * 兼容导出：旧的自研 Viewport2D 入口。
+ *
+ * @deprecated 建议迁移到模式化入口：`ViewportLite` 或 `ViewportModeHost`。
+ */
 export { Viewport2D } from './Viewport2D';
 export type { Viewport2DProps, Viewport2DChildrenArgs } from './Viewport2D';
 export type { Viewport2DController, Viewport2DCamera, Vec2 } from './types';
@@ -46,6 +51,23 @@ export type {
 
 export { useViewportCamera } from './useViewportCamera';
 export type { UseViewportCameraOptions } from './useViewportCamera';
+
+/**
+ * 模式化导出：按场景选择引擎。
+ */
+export type {
+  ViewportEngineDescriptor,
+  ViewportModeCamera,
+  ViewportModeController,
+  ViewportModeKind,
+} from './modes';
+export {
+  ViewportLite,
+  ViewportModeHost,
+  listViewportEngineDescriptors,
+  resolveViewportEngine,
+} from './modes';
+export type { ViewportLiteController, ViewportLiteProps, ViewportModeHostProps } from './modes';
 
 export type { LegacyCamera, CssPoint, WorldPoint } from './coordinateAdapters';
 export {

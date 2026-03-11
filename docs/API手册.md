@@ -3,17 +3,86 @@
 ## 包入口
 
 - 根入口：`2d-viewport-kit`
-  - 与 `2d-viewport-kit/core` 等价，导出纯 2D 视口核心能力。
+  - 与 `2d-viewport-kit/core` 等价，导出核心能力与模式化入口。
 - 核心入口：`2d-viewport-kit/core`
-  - 仅包含相机、交互、约束、渲染辅助与 React 视口组件，不包含 Radix UI 组件。
+  - 包含相机、交互、约束、渲染辅助、模式选择与 React 视口组件，不包含 Radix UI 组件。
+- 模式入口：`2d-viewport-kit/modes`
+  - 导出模式协议、模式宿主组件与引擎选择器。
+- 轻量模式入口：`2d-viewport-kit/mode-lite`
+  - 导出 `react-infinite-viewer` 适配层。
+- 游戏模式入口：`2d-viewport-kit/mode-game`
+  - 导出 `game` 模式元信息（引擎：`pixi-viewport`）。
+- 地图模式入口：`2d-viewport-kit/mode-map`
+  - 导出 `map` 模式元信息（引擎：`pixi-viewport`）。
 - UI 入口：`2d-viewport-kit/ui`
   - 导出可选的 Radix UI 外围组件，不会自动注入到核心入口。
+
+## 模式化 API（新增）
+
+### 引擎选择
+
+- `resolveViewportEngine(mode)`
+  - 输入：`'lite' | 'game' | 'map'`
+  - 输出：引擎描述对象（`react-infinite-viewer` 或 `pixi-viewport`）。
+- `listViewportEngineDescriptors()`
+  - 输出全部模式与引擎映射。
+
+### 模式宿主
+
+- `ViewportModeHost(props)`
+  - 根据 `mode` 自动选择渲染。
+  - `mode='lite'`：内部渲染 `ViewportLite`。
+  - `mode='game' | 'map'`：通过 `renderPixiMode` 注入 Pixi 视图。
+
+字段：
+- `mode: 'lite' | 'game' | 'map'`
+- `liteProps: ViewportLiteProps`
+- `renderPixiMode?: (mode: 'game' | 'map') => React.ReactNode`
+
+### 轻量模式（`mode-lite`）
+
+- `ViewportLite(props)`
+  - 轻量 2D 视口组件，底层对接 `react-infinite-viewer`。
+- `createLiteModeController(args)`
+  - 创建轻量模式控制器。
+
+`ViewportLite` 字段：
+- `width?: number | string`
+- `height?: number | string`
+- `background?: string`
+- `viewBox: ViewBox`
+- `initialCamera?: Camera2D`
+- `minScale?: number`
+- `maxScale?: number`
+- `zoomStep?: number`
+- `style?: CSSProperties`
+- `onCamera?: (camera: Camera2D) => void`
+- `children?: ReactNode`
+
+`ViewportLiteController` 字段：
+- `getCamera: () => Camera2D`
+- `setCamera: (camera: Camera2D) => void`
+- `fitToCenter: () => void`
+- `zoomIn: (factor?: number) => void`
+- `zoomOut: (factor?: number) => void`
+- `zoomTo: (scale: number, opts?: { anchorScreen?: Vec2 }) => void`
+
+### 游戏/地图模式（`mode-game` / `mode-map`）
+
+- `MODE_GAME_KIND`、`MODE_GAME_ENGINE`、`MODE_GAME_SUMMARY`
+- `MODE_MAP_KIND`、`MODE_MAP_ENGINE`、`MODE_MAP_SUMMARY`
+
+说明：
+- `game/map` 模式统一约定引擎为 `pixi-viewport`。
+- 具体 Pixi 视图由业务层注入，实现按场景自由组合。
 
 ## 核心入口（`2d-viewport-kit` / `2d-viewport-kit/core`）
 
 ### `Viewport2D`
 
 2D 视口 React 组件，支持平移、缩放、适配居中与 overlay。
+
+> 兼容说明：`Viewport2D` 属于历史自研实现，当前作为兼容层保留。新增项目建议优先使用模式化入口（`ViewportLite` 或 `ViewportModeHost`）。
 
 ### `useViewportCamera`
 
