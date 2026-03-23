@@ -1,10 +1,10 @@
-# 开发者指南（2d-viewport-kit）
+# 开发者指南（viewport-2d-kit-react）
 
-> 本文档面向需要维护/扩展 `2d-viewport-kit` 的开发者。
+> 本文档面向需要维护/扩展 `viewport-2d-kit-react` 的开发者。
 
 ## 1. 目标与定位
 
-`2d-viewport-kit` 当前采用“模式化引擎”路线：
+`viewport-2d-kit-react` 当前采用“模式化引擎”路线：
 
 1. `lite` 模式：`react-infinite-viewer`
 2. `game/map` 模式：`pixi-viewport`

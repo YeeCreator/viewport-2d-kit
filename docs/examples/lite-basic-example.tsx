@@ -1,5 +1,5 @@
 import React from 'react';
-import { ViewportLite } from '2d-viewport-kit';
+import { ViewportLite } from 'viewport-2d-kit-react';
 
 /**
  * 轻量模式最小示例。

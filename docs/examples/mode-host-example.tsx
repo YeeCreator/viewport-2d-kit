@@ -1,5 +1,5 @@
 import React from 'react';
-import { ViewportModeHost } from '2d-viewport-kit';
+import { ViewportModeHost } from 'viewport-2d-kit-react';
 
 /**
  * 模式宿主示例。

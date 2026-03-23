@@ -1,4 +1,4 @@
-# 2d-viewport-kit
+# viewport-2d-kit-react
 
 可复用的 2D 视窗（平移 + 缩放）React 组件，面向游戏、绘图应用和无限画布工具。
 
@@ -6,9 +6,9 @@
 
 ## 开发
 
-- 构建一次：`pnpm -C 2d-viewport-kit-react build`
-- 监听构建：`pnpm -C 2d-viewport-kit-react dev`
-- 类型检查：`pnpm -C 2d-viewport-kit-react typecheck`
+- 构建一次：`pnpm -C viewport-2d-kit-react build`
+- 监听构建：`pnpm -C viewport-2d-kit-react dev`
+- 类型检查：`pnpm -C viewport-2d-kit-react typecheck`
 
 ## 当被其他工程本地引用时的开发（重要）
 
@@ -16,42 +16,42 @@
 
 ### 方案 1（推荐）：在此包中运行 watch 构建
 
-1. 在 `2d-viewport-kit-react` 目录：
+1. 在 `viewport-2d-kit-react` 目录：
    - 首次：`pnpm install`
    - 启动监听：`pnpm dev`
 2. 在消费端项目：
    - 首次：`pnpm install`
    - 启动其开发服务器（`pnpm dev` / `pnpm start`）
 
-当你修改 `2d-viewport-kit-react/src/**` 时，`tsup --watch` 会自动更新 `dist/`。多数消费端在刷新浏览器后会获取到变更。
+当你修改 `viewport-2d-kit-react/src/**` 时，`tsup --watch` 会自动更新 `dist/`。多数消费端在刷新浏览器后会获取到变更。
 
 ### 方案 2：一次性构建
 
 如果不想一直运行 watcher：
 
-- 在 `2d-viewport-kit-react`：`pnpm build`
+- 在 `viewport-2d-kit-react`：`pnpm build`
 - 在消费端（在 Windows / pnpm 的某些情况下需要）：`pnpm install`
 
 ### VS Code（2025+）设置
 
 目标：一键同时启动“库的 watch 构建”和“消费端 dev”。
 
-- 在消费端创建一个 task，运行 `pnpm -C ../2d-viewport-kit-react dev`
+- 在消费端创建一个 task，运行 `pnpm -C ../viewport-2d-kit-react dev`
 - 再创建一个 task，运行消费端的 `pnpm dev`
 - 使用 compound task 同时运行两者。
 
 备注：
 - PowerShell 中用 `;` 链接命令。
-- 建议保持 `2d-viewport-kit-react` 的 watcher 在运行中，以便 `dist/` 持续更新。
+- 建议保持 `viewport-2d-kit-react` 的 watcher 在运行中，以便 `dist/` 持续更新。
 
 ### WebStorm（2025+）设置
 
 推荐做法：创建两个 Run Configuration 和一个 Compound：
 
 1. 运行配置 A（库的 watch）：
-   - package.json：`2d-viewport-kit-react/package.json`
+   - package.json：`viewport-2d-kit-react/package.json`
    - script：`dev`（tsup --watch）
-   - 工作目录：`.../2d-viewport-kit-react`
+   - 工作目录：`.../viewport-2d-kit-react`
 2. 运行配置 B（消费端）：
    - package.json：消费端的 package.json
    - script：`dev`
@@ -86,7 +86,7 @@ import {
   applyCameraToCanvas2D,
   serializeCamera,
   deserializeCamera,
-} from '2d-viewport-kit';
+} from 'viewport-2d-kit-react';
 ```
 
 ## 模式化引擎策略（2026-03）
@@ -97,7 +97,7 @@ import {
 推荐：
 
 ```ts
-import { ViewportLite, resolveViewportEngine } from '2d-viewport-kit';
+import { ViewportLite, resolveViewportEngine } from 'viewport-2d-kit-react';
 
 const liteEngine = resolveViewportEngine('lite');
 // liteEngine.engine === 'react-infinite-viewer'
@@ -110,14 +110,14 @@ const liteEngine = resolveViewportEngine('lite');
 
 ## 入口分层
 
-- 核心入口（推荐默认）：`2d-viewport-kit` 或 `2d-viewport-kit/core`
-- 模式入口：`2d-viewport-kit/modes`
-- 轻量模式入口：`2d-viewport-kit/mode-lite`
-- 游戏模式入口：`2d-viewport-kit/mode-game`
-- 地图模式入口：`2d-viewport-kit/mode-map`
-- 可选 UI 入口：`2d-viewport-kit/ui`
+- 核心入口（推荐默认）：`viewport-2d-kit-react` 或 `viewport-2d-kit-react/core`
+- 模式入口：`viewport-2d-kit-react/modes`
+- 轻量模式入口：`viewport-2d-kit-react/mode-lite`
+- 游戏模式入口：`viewport-2d-kit-react/mode-game`
+- 地图模式入口：`viewport-2d-kit-react/mode-map`
+- 可选 UI 入口：`viewport-2d-kit-react/ui`
 
-`2d-viewport-kit/ui` 依赖：
+`viewport-2d-kit-react/ui` 依赖：
 - `@radix-ui/react-toolbar`
 - `@radix-ui/react-dropdown-menu`
 - `@radix-ui/react-context-menu`

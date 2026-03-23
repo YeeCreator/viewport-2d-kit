@@ -2,19 +2,19 @@
 
 ## 包入口
 
-- 根入口：`2d-viewport-kit`
-  - 与 `2d-viewport-kit/core` 等价，导出核心能力与模式化入口。
-- 核心入口：`2d-viewport-kit/core`
+- 根入口：`viewport-2d-kit-react`
+  - 与 `viewport-2d-kit-react/core` 等价，导出核心能力与模式化入口。
+- 核心入口：`viewport-2d-kit-react/core`
   - 包含相机、交互、约束、渲染辅助、模式选择与 React 视口组件，不包含 Radix UI 组件。
-- 模式入口：`2d-viewport-kit/modes`
+- 模式入口：`viewport-2d-kit-react/modes`
   - 导出模式协议、模式宿主组件与引擎选择器。
-- 轻量模式入口：`2d-viewport-kit/mode-lite`
+- 轻量模式入口：`viewport-2d-kit-react/mode-lite`
   - 导出 `react-infinite-viewer` 适配层。
-- 游戏模式入口：`2d-viewport-kit/mode-game`
+- 游戏模式入口：`viewport-2d-kit-react/mode-game`
   - 导出 `game` 模式元信息（引擎：`pixi-viewport`）。
-- 地图模式入口：`2d-viewport-kit/mode-map`
+- 地图模式入口：`viewport-2d-kit-react/mode-map`
   - 导出 `map` 模式元信息（引擎：`pixi-viewport`）。
-- UI 入口：`2d-viewport-kit/ui`
+- UI 入口：`viewport-2d-kit-react/ui`
   - 导出可选的 Radix UI 外围组件，不会自动注入到核心入口。
 
 ## 模式化 API（新增）
@@ -82,7 +82,7 @@
 - `game/map` 模式统一约定引擎为 `pixi-viewport`。
 - 具体 Pixi 视图由业务层注入，实现按场景自由组合。
 
-## 核心入口（`2d-viewport-kit` / `2d-viewport-kit/core`）
+## 核心入口（`viewport-2d-kit-react` / `viewport-2d-kit-react/core`）
 
 ### `Viewport2D`
 
@@ -136,7 +136,7 @@
 - `worldToLocalCssWithScroll`
 - 其余 `coordinateAdapters` 导出函数
 
-## UI 入口（`2d-viewport-kit/ui`）
+## UI 入口（`viewport-2d-kit-react/ui`）
 
 > 依赖：`@radix-ui/react-toolbar`、`@radix-ui/react-dropdown-menu`、`@radix-ui/react-context-menu`。
 
