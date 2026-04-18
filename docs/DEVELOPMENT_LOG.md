@@ -2,6 +2,71 @@
 
 > 记录每一次功能新增/改动/修复的摘要，便于回溯。
 
+## 2026-03-11
+
+### 第二轮补全：mode-lite 迁移能力增强 + 调试验证通过
+
+本轮围绕“兼容映射表”和“弃用批次计划”补齐剩余关键能力。
+
+代码补全：
+
+1. `ViewportLite` 新增：
+  - `overlay`（支持固定屏幕层）
+  - `controllerRef`（便于复用旧工具栏控制逻辑）
+  - `paddingPx`、`autoFitOnViewBoxChange`
+2. `createLiteModeController` 新增：
+  - `animateToCamera` 动画控制
+3. `ViewportModeHost` 新增：
+  - `liteProps` 可选
+  - `fallback` 兜底渲染
+4. 新增模式化示例：
+  - `docs/examples/lite-basic-example.tsx`
+  - `docs/examples/mode-host-example.tsx`
+
+调试验证：
+
+1. `pnpm typecheck` 通过。
+2. `pnpm build` 通过。
+3. `dist` 产物已生成模式化入口与类型声明。
+
+### 阶段进展：2D 视口引擎切换（第一轮）
+
+本次改造对齐 `.github/docs/design/design-2d-viewport-engine-strategy-20260311-001.md` 与 `.github/docs/plan/plan-2d-viewport-engine-switch-20260311-001.md`。
+
+已完成：
+
+1. 新增模式化目录与协议：
+  - `src/modes/contracts.ts`
+  - `src/modes/engineSelector.ts`
+  - `src/modes/ViewportModeHost.tsx`
+2. 新增 `mode-lite` 适配层（`react-infinite-viewer`）：
+  - `src/modes/modeLite/*`
+  - `src/mode-lite.ts`
+3. 新增 `mode-game` / `mode-map` 元信息入口（`pixi-viewport`）：
+  - `src/modes/modeGame/index.ts`
+  - `src/modes/modeMap/index.ts`
+  - `src/mode-game.ts`
+  - `src/mode-map.ts`
+4. 更新导出与构建：
+  - `package.json` 新增 `./modes`、`./mode-lite`、`./mode-game`、`./mode-map`
+  - `tsup.config.ts` 新增模式入口构建
+5. 兼容层策略落地：
+  - `src/index.ts` 将 `Viewport2D` 标注为兼容导出并补充模式化导出
+
+验证情况：
+
+1. `pnpm install` 已通过。
+2. `pnpm typecheck` 可执行，无阻塞性 TypeScript 编译错误。
+3. `get_errors` 仍有示例/组件内联样式规范告警，不影响当前功能链路。
+
+计划完成度（按实施方案阶段）：
+
+1. 阶段 0：已完成（基线冻结和方向落地）。
+2. 阶段 1：已完成（模式协议与适配接口已落地代码）。
+3. 阶段 2：进行中（`mode-lite` 主体完成，仍需补示例与回归测试）。
+4. 阶段 3：进行中（`game/map` 元信息已完成，Pixi 接入规范与回归待补）。
+5. 阶段 4：未开始（业务迁移清单、弃用批次计划待执行）。
+
 ## 2026-03-05
 
 ### 新增：coordinateAdapters（承接业务仓库坐标迁移）
@@ -12,6 +77,33 @@
   - canvas 映射工具：`getDprScaleFromCanvas`、`localCssPxToCanvasPx`、`canvasPxToLocalCssPx`
 - 在 `src/index.ts` 对外导出上述类型和函数，供依赖项目直接复用。
 - 目标：减少消费者项目重复实现，统一坐标语义与迁移口径。
+
+## 2026-03-10
+
+### 阶段完成：core/ui 分层 + Radix 可选 UI 接入
+
+- 新增多入口构建：`src/index.ts`、`src/core.ts`、`src/ui.ts`。
+- 新增 `package.json` 子导出：`./core`、`./ui`。
+- 新增可选 UI 组件：
+  - `src/ui/ViewportToolbar.tsx`
+  - `src/ui/ViewportOverlayMenu.tsx`
+  - `src/ui/ViewportStatus.tsx`
+- 核心保持不变：`Viewport2D`、交互、约束、渲染与坐标适配逻辑不受 UI 依赖影响。
+
+### 依赖与包体策略
+
+- `@radix-ui/react-toolbar`、`@radix-ui/react-dropdown-menu`、`@radix-ui/react-context-menu` 以可选 `peerDependencies` 方式声明。
+- 核心入口不绑定 Radix，使用者按需安装并从 `viewport-2d-kit-react/ui` 引入。
+
+### 文档与示例
+
+- 新增 `docs/API手册.md`，同步 `core/ui` 入口与 UI 组件字段说明。
+- 更新 `docs/使用指南.md`、`docs/DEVELOPER_GUIDE.md`、`README.md`。
+- 新增示例与索引：
+  - `docs/examples/map-editor-example.tsx`
+  - `docs/examples/note-canvas-example.tsx`
+  - `docs/examples/drawing-tool-example.tsx`
+  - `docs/示例集成.md`
 
 ## 2026-02-02
 

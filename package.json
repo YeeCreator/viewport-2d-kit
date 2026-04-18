@@ -1,5 +1,5 @@
 {
-  "name": "viewport-kit",
+  "name": "viewport-2d-kit-react",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -9,6 +9,30 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./core": {
+      "types": "./dist/core.d.ts",
+      "import": "./dist/core.js"
+    },
+    "./modes": {
+      "types": "./dist/modes/index.d.ts",
+      "import": "./dist/modes/index.js"
+    },
+    "./mode-lite": {
+      "types": "./dist/mode-lite.d.ts",
+      "import": "./dist/mode-lite.js"
+    },
+    "./mode-game": {
+      "types": "./dist/mode-game.d.ts",
+      "import": "./dist/mode-game.js"
+    },
+    "./mode-map": {
+      "types": "./dist/mode-map.d.ts",
+      "import": "./dist/mode-map.js"
+    },
+    "./ui": {
+      "types": "./dist/ui.d.ts",
+      "import": "./dist/ui.js"
     }
   },
   "files": [
@@ -21,10 +45,47 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "peerDependencies": {
+    "@radix-ui/react-context-menu": "^2.2.16",
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "@radix-ui/react-toolbar": "^1.1.11",
+    "@pixi/react": "^8.0.0",
+    "pixi-viewport": "^6.0.0",
+    "pixi.js": "^8.0.0",
     "react": "^19.0.0"
+    ,"react-infinite-viewer": "^0.26.0"
+  },
+  "peerDependenciesMeta": {
+    "@radix-ui/react-context-menu": {
+      "optional": true
+    },
+    "@radix-ui/react-dropdown-menu": {
+      "optional": true
+    },
+    "@radix-ui/react-toolbar": {
+      "optional": true
+    },
+    "@pixi/react": {
+      "optional": true
+    },
+    "pixi-viewport": {
+      "optional": true
+    },
+    "pixi.js": {
+      "optional": true
+    },
+    "react-infinite-viewer": {
+      "optional": true
+    }
   },
   "devDependencies": {
+    "@radix-ui/react-context-menu": "^2.2.16",
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "@radix-ui/react-toolbar": "^1.1.11",
+    "@pixi/react": "^8.0.0",
     "@types/react": "^19.0.10",
+    "pixi-viewport": "^6.0.0",
+    "pixi.js": "^8.0.0",
+    "react-infinite-viewer": "^0.26.0",
     "tsup": "^8.0.2",
     "typescript": "~5.7.2"
   }

@@ -1,17 +1,16 @@
-# 开发者指南（viewport-kit）
+# 开发者指南（viewport-2d-kit-react）
 
-> 本文档面向需要维护/扩展 `viewport-kit` 的开发者。
+> 本文档面向需要维护/扩展 `viewport-2d-kit-react` 的开发者。
 
 ## 1. 目标与定位
 
-`viewport-kit` 提供一个通用的 2D 视口（Viewport）能力：
+`viewport-2d-kit-react` 当前采用“模式化引擎”路线：
 
-- 平移（pan）
-- 缩放（zoom）
-- fit/center 复位
-- 将“世界坐标（world）”通过相机变换映射到“屏幕像素（screen）”
+1. `lite` 模式：`react-infinite-viewer`
+2. `game/map` 模式：`pixi-viewport`
+3. `Viewport2D`：历史自研实现，仅兼容保留
 
-常用于：棋盘/地图、绘图画布、RPG 地图编辑器、无限画布应用等。
+常用于：轻量画布、地图编辑、游戏镜头、无限画布应用。
 
 ## 2. 坐标模型
 
@@ -28,15 +27,41 @@
 
 ## 3. 组件与核心模块
 
-- `src/Viewport2D.tsx`：React 视口容器（内容层 transform + 交互绑定 + overlay）
-- `src/useViewportCamera.ts`：指针/滚轮交互与相机状态管理
-- `src/viewportMath.ts`：相机数学、transform 工具函数
-- `src/interactions.ts`：交互策略（drag-pan, pinch/ctrl+wheel zoom 等）
-- `src/controller.ts`：命令式控制器（动画、zoomIn/zoomOut 等）
-- `src/preventPageZoom.ts`：可选：防页面缩放（游戏式交互场景）
-- `src/coordinateAdapters.ts`：跨项目迁移适配工具（legacy 相机互转、wrap 本地 CSS 坐标换算、canvas DPR 映射）
+1. 兼容层：
+	- `src/Viewport2D.tsx`
+	- `src/useViewportCamera.ts`
+	- `src/interactions.ts`
+2. 模式层：
+	- `src/modes/contracts.ts`
+	- `src/modes/engineSelector.ts`
+	- `src/modes/ViewportModeHost.tsx`
+3. `mode-lite`：
+	- `src/modes/modeLite/ViewportLite.tsx`
+	- `src/modes/modeLite/createLiteModeController.ts`
+4. `mode-game/map`：
+	- `src/modes/modeGame/index.ts`
+	- `src/modes/modeMap/index.ts`
+5. 工具层：
+	- `src/viewportMath.ts`
+	- `src/controller.ts`
+	- `src/coordinateAdapters.ts`
 
-## 3.1 coordinateAdapters 设计边界
+## 3.1 入口分层
+
+1. `src/index.ts`：统一入口（兼容导出 + 模式化导出）。
+2. `src/core.ts`：核心子入口。
+3. `src/modes/index.ts`：模式协议与模式宿主。
+4. `src/mode-lite.ts`：lite 子入口。
+5. `src/mode-game.ts`：game 子入口。
+6. `src/mode-map.ts`：map 子入口。
+7. `src/ui.ts`：可选 UI 子入口。
+
+设计约束：
+1. 新增能力优先落在模式层，不再扩展 `Viewport2D` 的底层交互能力。
+2. `game/map` 不在库内硬编码 Pixi 场景树，由业务通过 `renderPixiMode` 注入。
+3. 对外协议保持稳定：`getCamera`、`setCamera`、`fitToCenter`、`zoomTo`。
+
+## 3.2 coordinateAdapters 设计边界
 
 `coordinateAdapters` 用于承载“坐标语义转换”和“旧项目迁移兼容”能力，避免业务仓库重复维护同类工具。
 
@@ -49,7 +74,13 @@
 	- 业务领域对象（cell/edge/formula）
 	- 具体应用交互状态机
 
-## 4. 关于 overlay 是否可交互（非常重要）
+## 4. 关于 `Viewport2D` 兼容层
+
+1. `Viewport2D` 作为历史实现继续可用，但定位为兼容层。
+2. 兼容层允许修复问题，不再承接新特性迭代。
+3. 新模块请直接接入 `ViewportLite` 或 `ViewportModeHost`。
+
+## 5. 关于 overlay 是否可交互（非常重要）
 
 `Viewport2D` 的 overlay 在屏幕空间渲染（不随相机变换）。
 
@@ -61,14 +92,24 @@
 
 - `style={{ pointerEvents: 'auto' }}`
 
-## 5. 本地开发
+## 6. 本地开发
 
 - `pnpm install`
 - `pnpm dev`（tsup --watch）
 - `pnpm build`
 - `pnpm typecheck`
 
-## 6. 作为 file 依赖被引用时
+构建产物将包含：
+
+1. `dist/index.*`
+2. `dist/core.*`
+3. `dist/modes/index.*`
+4. `dist/mode-lite.*`
+5. `dist/mode-game.*`
+6. `dist/mode-map.*`
+7. `dist/ui.*`
+
+## 7. 作为 file 依赖被引用时
 
 本包对外只导出 `dist/`。
 
