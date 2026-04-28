@@ -6,4 +6,4 @@
  * import { ViewportLite, resolveViewportEngine } from '2d-viewport-kit/core';
  * ```
  */
-export * from './index';
+export * from './core';

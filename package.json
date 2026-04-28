@@ -1,38 +1,47 @@
 {
-  "name": "viewport-2d-kit-react",
+  "name": "viewport-2d-kit",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "packageManager": "pnpm@10.33.2",
+  "main": "./dist/vue/index.js",
+  "types": "./dist/vue/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./dist/vue/index.d.ts",
+      "import": "./dist/vue/index.js"
+    },
+    "./vue": {
+      "types": "./dist/vue/index.d.ts",
+      "import": "./dist/vue/index.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js"
     },
     "./core": {
-      "types": "./dist/core.d.ts",
-      "import": "./dist/core.js"
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js"
     },
     "./modes": {
-      "types": "./dist/modes/index.d.ts",
-      "import": "./dist/modes/index.js"
+      "types": "./dist/react/modes/index.d.ts",
+      "import": "./dist/react/modes/index.js"
     },
     "./mode-lite": {
-      "types": "./dist/mode-lite.d.ts",
-      "import": "./dist/mode-lite.js"
+      "types": "./dist/react/mode-lite.d.ts",
+      "import": "./dist/react/mode-lite.js"
     },
     "./mode-game": {
-      "types": "./dist/mode-game.d.ts",
-      "import": "./dist/mode-game.js"
+      "types": "./dist/react/mode-game.d.ts",
+      "import": "./dist/react/mode-game.js"
     },
     "./mode-map": {
-      "types": "./dist/mode-map.d.ts",
-      "import": "./dist/mode-map.js"
+      "types": "./dist/react/mode-map.d.ts",
+      "import": "./dist/react/mode-map.js"
     },
     "./ui": {
-      "types": "./dist/ui.d.ts",
-      "import": "./dist/ui.js"
+      "types": "./dist/react/ui/index.d.ts",
+      "import": "./dist/react/ui/index.js"
     }
   },
   "files": [
@@ -51,7 +60,8 @@
     "@pixi/react": "^8.0.0",
     "pixi-viewport": "^6.0.0",
     "pixi.js": "^8.0.0",
-    "react": "^19.0.0"
+    "react": "^19.0.0",
+    "vue": "^3.5.0"
     ,"react-infinite-viewer": "^0.26.0"
   },
   "peerDependenciesMeta": {
@@ -73,6 +83,9 @@
     "pixi.js": {
       "optional": true
     },
+    "vue": {
+      "optional": true
+    },
     "react-infinite-viewer": {
       "optional": true
     }
@@ -85,6 +98,7 @@
     "@types/react": "^19.0.10",
     "pixi-viewport": "^6.0.0",
     "pixi.js": "^8.0.0",
+    "vue": "^3.5.0",
     "react-infinite-viewer": "^0.26.0",
     "tsup": "^8.0.2",
     "typescript": "~5.7.2"

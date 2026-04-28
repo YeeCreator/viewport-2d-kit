@@ -3,12 +3,14 @@ import { defineConfig } from 'tsup';
 export default defineConfig({
   entry: [
     'src/index.ts',
-    'src/core.ts',
-    'src/ui.ts',
-    'src/modes/index.ts',
-    'src/mode-lite.ts',
-    'src/mode-game.ts',
-    'src/mode-map.ts',
+    'src/core/index.ts',
+    'src/vue/index.ts',
+    'src/react/index.ts',
+    'src/react/ui/index.ts',
+    'src/react/modes/index.ts',
+    'src/react/mode-lite.ts',
+    'src/react/mode-game.ts',
+    'src/react/mode-map.ts',
   ],
   format: ['esm'],
   dts: true,
@@ -16,6 +18,7 @@ export default defineConfig({
   clean: true,
   treeshake: true,
   external: [
+    'vue',
     'react',
     'react-infinite-viewer',
     'pixi.js',
