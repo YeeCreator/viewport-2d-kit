@@ -1,6 +1,6 @@
 import React from 'react';
-import { Viewport2D } from 'viewport-2d-kit-react/core';
-import { ViewportOverlayMenu } from 'viewport-2d-kit-react/ui';
+import { Viewport2D } from 'viewport-2d-kit/core';
+import { ViewportOverlayMenu } from 'viewport-2d-kit/ui';
 
 /**
  * 笔记卡片模型。

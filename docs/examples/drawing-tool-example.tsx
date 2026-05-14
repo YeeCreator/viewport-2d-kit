@@ -1,6 +1,6 @@
 import React from 'react';
-import { Viewport2D, type Viewport2DController } from 'viewport-2d-kit-react/core';
-import { ViewportToolbar } from 'viewport-2d-kit-react/ui';
+import { Viewport2D, type Viewport2DController } from 'viewport-2d-kit/core';
+import { ViewportToolbar } from 'viewport-2d-kit/ui';
 
 /**
  * 折线点位。

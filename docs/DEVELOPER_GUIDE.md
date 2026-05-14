@@ -1,10 +1,10 @@
-# 开发者指南（viewport-2d-kit-react）
+# 开发者指南（viewport-2d-kit）
 
-> 本文档面向需要维护/扩展 `viewport-2d-kit-react` 的开发者。
+> 本文档面向需要维护/扩展 `viewport-2d-kit` 的开发者。
 
 ## 1. 目标与定位
 
-`viewport-2d-kit-react` 当前采用“模式化引擎”路线：
+`viewport-2d-kit` 当前采用“模式化引擎”路线：
 
 1. `lite` 模式：`react-infinite-viewer`
 2. `game/map` 模式：`pixi-viewport`
@@ -98,6 +98,8 @@
 - `pnpm dev`（tsup --watch）
 - `pnpm build`
 - `pnpm typecheck`
+
+说明：`viewport-2d-kit` 作为基础工具包，不提供 `dev:deps` / `build:deps`。依赖它的业务项目通过各自的 `dev:deps` 与 `build:deps` 统一调度。
 
 构建产物将包含：
 

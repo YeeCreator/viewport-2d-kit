@@ -1,14 +1,27 @@
-# viewport-2d-kit-react
+# viewport-2d-kit
 
-可复用的 2D 视窗（平移 + 缩放）React 组件，面向游戏、绘图应用和无限画布工具。
+可复用的 2D 视窗（平移 + 缩放）工具包，定位为 **Vue3 + core** 的编辑器基础包。
+
+本包可直接作为 `main-ui` 的编辑器实现被注册到任意工作区标签页。
 
 此包为私有包，旨在在本工作区中使用。
 
+## 入口
+
+- 根入口：`viewport-2d-kit`
+   - 聚合导出 `core`、`vue`、`main-ui`。
+- 核心入口：`viewport-2d-kit/core`
+   - 与框架无关的相机、交互、约束、渲染辅助、坐标换算能力。
+- Vue 入口：`viewport-2d-kit/vue`
+   - `Viewport2DCanvas` 与 Vue 侧编辑器桥接能力。
+- main-ui 入口：`viewport-2d-kit/main-ui`
+   - 提供 `ViewportMainUiEditor` 与注册辅助函数，用于作为 `main-ui` 编辑器加载。
+
 ## 开发
 
-- 构建一次：`pnpm -C viewport-2d-kit-react build`
-- 监听构建：`pnpm -C viewport-2d-kit-react dev`
-- 类型检查：`pnpm -C viewport-2d-kit-react typecheck`
+- 构建一次：`pnpm -C viewport-2d-kit build`
+- 监听构建：`pnpm -C viewport-2d-kit dev`
+- 类型检查：`pnpm -C viewport-2d-kit typecheck`
 
 ## 当被其他工程本地引用时的开发（重要）
 
@@ -16,42 +29,42 @@
 
 ### 方案 1（推荐）：在此包中运行 watch 构建
 
-1. 在 `viewport-2d-kit-react` 目录：
+1. 在 `viewport-2d-kit` 目录：
    - 首次：`pnpm install`
    - 启动监听：`pnpm dev`
 2. 在消费端项目：
    - 首次：`pnpm install`
    - 启动其开发服务器（`pnpm dev` / `pnpm start`）
 
-当你修改 `viewport-2d-kit-react/src/**` 时，`tsup --watch` 会自动更新 `dist/`。多数消费端在刷新浏览器后会获取到变更。
+当你修改 `viewport-2d-kit/src/**` 时，`tsup --watch` 会自动更新 `dist/`。多数消费端在刷新浏览器后会获取到变更。
 
 ### 方案 2：一次性构建
 
 如果不想一直运行 watcher：
 
-- 在 `viewport-2d-kit-react`：`pnpm build`
+- 在 `viewport-2d-kit`：`pnpm build`
 - 在消费端（在 Windows / pnpm 的某些情况下需要）：`pnpm install`
 
 ### VS Code（2025+）设置
 
 目标：一键同时启动“库的 watch 构建”和“消费端 dev”。
 
-- 在消费端创建一个 task，运行 `pnpm -C ../viewport-2d-kit-react dev`
+- 在消费端创建一个 task，运行 `pnpm -C ../viewport-2d-kit dev`
 - 再创建一个 task，运行消费端的 `pnpm dev`
 - 使用 compound task 同时运行两者。
 
 备注：
 - PowerShell 中用 `;` 链接命令。
-- 建议保持 `viewport-2d-kit-react` 的 watcher 在运行中，以便 `dist/` 持续更新。
+- 建议保持 `viewport-2d-kit` 的 watcher 在运行中，以便 `dist/` 持续更新。
 
 ### WebStorm（2025+）设置
 
 推荐做法：创建两个 Run Configuration 和一个 Compound：
 
 1. 运行配置 A（库的 watch）：
-   - package.json：`viewport-2d-kit-react/package.json`
+   - package.json：`viewport-2d-kit/package.json`
    - script：`dev`（tsup --watch）
-   - 工作目录：`.../viewport-2d-kit-react`
+   - 工作目录：`.../viewport-2d-kit`
 2. 运行配置 B（消费端）：
    - package.json：消费端的 package.json
    - script：`dev`
@@ -69,14 +82,12 @@
 
 此方案比 watch 慢，但明确可靠。
 
-## 在工作区内的使用示例
+## 使用示例
+
+### 1) 使用 core 能力
 
 ```ts
 import {
-  Viewport2D,
-   ViewportLite,
-   ViewportModeHost,
-   resolveViewportEngine,
   createViewportController,
   type ViewportController,
   type ViewportInteractionMode,
@@ -86,43 +97,35 @@ import {
   applyCameraToCanvas2D,
   serializeCamera,
   deserializeCamera,
-} from 'viewport-2d-kit-react';
+} from 'viewport-2d-kit/core';
 ```
 
-## 模式化引擎策略（2026-03）
-
-- `lite` 场景：`react-infinite-viewer`
-- `game/map` 场景：`pixi-viewport`
-
-推荐：
+### 2) 直接注册为 main-ui 编辑器
 
 ```ts
-import { ViewportLite, resolveViewportEngine } from 'viewport-2d-kit-react';
+import { registerViewportMainUiEditor } from 'viewport-2d-kit/main-ui';
 
-const liteEngine = resolveViewportEngine('lite');
-// liteEngine.engine === 'react-infinite-viewer'
+registerViewportMainUiEditor(runtime, {
+   kind: 'viewport-foundation',
+   title: 'Viewport foundation',
+   rendererKey: 'viewport-foundation-editor',
+   allowedWorkspaceIds: ['workspace-demo', 'workspace-analysis'],
+});
 ```
 
-兼容说明：
+### 3) 仅使用组件并由宿主自定义 descriptor
 
-- `Viewport2D`（自研内核）目前保留为兼容层。
-- 新需求建议优先使用 `ViewportLite` 或 `ViewportModeHost`。
+```ts
+import { ViewportMainUiEditor } from 'viewport-2d-kit/main-ui';
 
-## 入口分层
+runtime.vue.registerEditorRenderer('viewport-foundation-editor', ViewportMainUiEditor);
+```
 
-- 核心入口（推荐默认）：`viewport-2d-kit-react` 或 `viewport-2d-kit-react/core`
-- 模式入口：`viewport-2d-kit-react/modes`
-- 轻量模式入口：`viewport-2d-kit-react/mode-lite`
-- 游戏模式入口：`viewport-2d-kit-react/mode-game`
-- 地图模式入口：`viewport-2d-kit-react/mode-map`
-- 可选 UI 入口：`viewport-2d-kit-react/ui`
+## main-ui 编辑器定位
 
-`viewport-2d-kit-react/ui` 依赖：
-- `@radix-ui/react-toolbar`
-- `@radix-ui/react-dropdown-menu`
-- `@radix-ui/react-context-menu`
-
-示例代码见：`docs/示例集成.md`
+- 工具包提供了可直接挂到 `main-ui` 的 Vue 编辑器组件。
+- 编辑器 payload 支持：`viewBox`、`minScale`、`maxScale`、`paddingPx`、`nodes`、`edges`。
+- 同一 renderer 可被多个工作区引用，从而实现“任意窗口（标签页）加载使用”。
 
 ## 核心概念
 
@@ -137,7 +140,7 @@ const liteEngine = resolveViewportEngine('lite');
 
 ### overlay 默认不拦截交互
 
-`Viewport2D` 的 overlay 会渲染在最上层（`position:absolute; inset:0`）。为避免覆盖底层内容层（canvas/svg）导致点击失效，
+`Viewport2DCanvas` 的 overlay 会渲染在最上层（`position:absolute; inset:0`）。为避免覆盖底层内容层（canvas/svg）导致点击失效，
 本库默认让 overlay 容器 `pointer-events: none`。
 
 如果你的业务确实需要“在屏幕空间捕获 pointer 事件”（例如：棋盘游戏的点击落子需要按 camera 做 screen→world 映射），
@@ -147,9 +150,9 @@ const liteEngine = resolveViewportEngine('lite');
 
 这样既不会影响默认行为，也能实现可控的交互层。
 
-## `Viewport2D`（React 组件）
+## `Viewport2DCanvas`（Vue 组件）
 
-`Viewport2D` 提供经过变换的内容层以及指针 / 滚轮交互：
+`Viewport2DCanvas` 提供经过变换的内容层以及指针 / 滚轮交互：
 
 - 平移：拖拽 / 触控板滚轮
 - 缩放：Ctrl + 滚轮 / 触摸捏合

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Viewport2D, type Viewport2DController } from 'viewport-2d-kit-react/core';
-import { ViewportToolbar, ViewportStatus } from 'viewport-2d-kit-react/ui';
+import { Viewport2D, type Viewport2DController } from 'viewport-2d-kit/core';
+import { ViewportToolbar, ViewportStatus } from 'viewport-2d-kit/ui';
 
 /**
  * 地图编辑示例点位。

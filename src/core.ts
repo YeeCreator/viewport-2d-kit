@@ -1,9 +1,9 @@
 /**
- * 核心入口：导出 2D 视口核心能力与模式化引擎接口。
+ * 核心入口：导出纯函数与框架无关的视口能力。
  *
  * @example
  * ```ts
- * import { ViewportLite, resolveViewportEngine } from '2d-viewport-kit/core';
+ * import { createViewportController } from 'viewport-2d-kit/core';
  * ```
  */
-export * from './core';
+export * from './core/index';

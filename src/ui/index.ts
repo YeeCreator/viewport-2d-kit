@@ -3,7 +3,7 @@
  *
  * @example
  * ```ts
- * import { ViewportToolbar, ViewportOverlayMenu, ViewportStatus } from '2d-viewport-kit/ui';
+ * import { ViewportToolbar, ViewportOverlayMenu, ViewportStatus } from 'viewport-2d-kit/ui';
  * ```
  */
 export { ViewportToolbar } from './ViewportToolbar';

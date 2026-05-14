@@ -1,5 +1,7 @@
-/**
- * Vue 层入口：导出可直接挂载的 Vue 视口组件，同时复用 core 数学能力。
- */
-export * from './Viewport2DCanvas'
-export * from '../core/index'
+export type {
+  ViewportContainerSize,
+  Viewport2DCanvasExpose,
+} from './Viewport2DCanvas';
+export { Viewport2DCanvas } from './Viewport2DCanvas';
+export type { Viewport2DChildrenArgs, Viewport2DProps } from './Viewport2D';
+export { Viewport2D } from './Viewport2D';

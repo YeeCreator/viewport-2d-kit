@@ -12,8 +12,8 @@ export type CssPoint = { x: number; y: number };
 export type WorldPoint = { x: number; y: number };
 
 /**
- * 将 2d-viewport-kit 相机转换为 legacy 相机。
- * @param camera2d 2d-viewport-kit 相机
+ * 将 viewport-2d-kit 相机转换为 legacy 相机。
+ * @param camera2d viewport-2d-kit 相机
  * @param opts dprScale 为 CSS 像素到 canvas 像素倍率
  */
 export function camera2DToLegacy(camera2d: Camera2D, opts: { dprScale: number }): LegacyCamera {
@@ -24,7 +24,7 @@ export function camera2DToLegacy(camera2d: Camera2D, opts: { dprScale: number })
 }
 
 /**
- * 将 legacy 相机转换为 2d-viewport-kit 相机。
+ * 将 legacy 相机转换为 viewport-2d-kit 相机。
  * @param cam legacy 相机
  * @param opts dprScale 为 CSS 像素到 canvas 像素倍率
  */
@@ -103,7 +103,7 @@ export function worldToLocalCss(_wrapEl: HTMLDivElement, camera: Camera2D, world
 
 /**
  * 过渡兼容：world 坐标先映射到 workspace CSS，再减去 wrap 滚动得到本地 CSS。
- * 对于 2d-viewport-kit 语义完整的层，优先使用 worldToLocalCss。
+ * 对于 viewport-2d-kit 语义完整的层，优先使用 worldToLocalCss。
  */
 export function worldToLocalCssWithScroll(wrapEl: HTMLDivElement, camera: Camera2D, world: WorldPoint): CssPoint {
   const ws = worldToWorkspaceCss(camera, world);

@@ -1,8 +1,8 @@
-export type { Viewport2DController, Viewport2DCamera, Vec2 } from '../types';
+export type { Viewport2DController, Viewport2DCamera } from '../types';
+export type { Vec2, Camera2D, ViewBox } from '../viewportMath';
 
 export { installPreventPageZoom } from '../preventPageZoom';
 
-export type { ViewBox, Camera2D } from '../viewportMath';
 export {
   cameraToCssTransform,
   clamp,
@@ -17,7 +17,7 @@ export type { CameraConstraints } from '../constraints';
 export { constrainCamera } from '../constraints';
 
 export type { SerializedCamera2D, ViewportController } from '../controller';
-export { serializeCamera, deserializeCamera, createViewportController } from '../controller';
+export { createViewportController, deserializeCamera, serializeCamera } from '../controller';
 
 export type { AnimateCameraOptions, EasingFn } from '../animation';
 export { animateCamera, easeInOutCubic, easeOutCubic } from '../animation';
@@ -31,9 +31,7 @@ export {
   screenDeltaToWorldDelta,
 } from '../renderers';
 
-export {
-  createViewportInteractions,
-} from '../interactions';
+export { createViewportInteractions } from '../interactions';
 export type {
   CreateViewportInteractionsOptions,
   ViewportCameraApi,
@@ -42,19 +40,6 @@ export type {
   ViewportRect,
   ViewportWheelEventLike,
 } from '../interactions';
-
-export type {
-  ViewportEngineDescriptor,
-  ViewportModeCamera,
-  ViewportModeController,
-  ViewportModeKind,
-} from '../modes/contracts';
-export {
-  listViewportEngineDescriptors,
-  resolveViewportEngine,
-} from '../modes/engineSelector';
-export * from '../modes/modeGame';
-export * from '../modes/modeMap';
 
 export type { LegacyCamera, CssPoint, WorldPoint } from '../coordinateAdapters';
 export {

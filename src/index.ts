@@ -1,9 +1,6 @@
 /**
- * 默认入口：core + vue。
+ * Vue3 + core 聚合入口。
  */
-export * from './vue';
-
-/**
- * 备用入口：react。
- */
-export * as ReactCompat from './react';
+export * from './core/index';
+export * from './vue/index';
+export * from './main-ui/index';
