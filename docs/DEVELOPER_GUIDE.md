@@ -45,6 +45,9 @@
 	- `src/viewportMath.ts`
 	- `src/controller.ts`
 	- `src/coordinateAdapters.ts`
+6. Vue 宿主层：
+	- `src/vue/useViewportHostBridge.ts`
+	- `src/vue/ViewportBusinessCanvasShell.ts`
 
 ## 3.1 入口分层
 
@@ -68,11 +71,26 @@
 - 包含：
 	- `camera2DToLegacy` / `legacyToCamera2D`
 	- `clientToLocalCssPoint` / `localCssToWorld` / `worldToLocalCss`
+	- `clientToWorldPoint` / `clientEventToWorldPoint`
 	- `worldToLocalCssWithScroll`（过渡兼容）
 	- `getDprScaleFromCanvas` / `localCssPxToCanvasPx` / `canvasPxToLocalCssPx`
 - 不包含：
 	- 业务领域对象（cell/edge/formula）
 	- 具体应用交互状态机
+
+## 3.3 Vue 宿主壳边界
+
+`ViewportBusinessCanvasShell` 与 `useViewportHostBridge` 用于承载“宿主编辑器样板”，目标是减少业务仓库重复维护以下结构：
+
+1. 左右侧栏 + 中央 stage 的三栏布局。
+2. stage toolbar 的 leading / center / trailing 样板。
+3. `client -> world`、`screen delta -> world delta`、`viewBox -> SVG/world style` 这类桥接胶水。
+
+它们不负责：
+
+1. 业务节点/边模型。
+2. 业务面板字段。
+3. 业务命令总线、服务容器、状态仓库。
 
 ## 4. 关于 `Viewport2D` 兼容层
 

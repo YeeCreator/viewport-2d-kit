@@ -90,6 +90,12 @@ import { Viewport2DCanvas } from 'viewport-2d-kit/vue'
 2. 宿主需要把业务节点、边、棋子、图形画在 viewport 内。
 3. 宿主需要自己的 context、service、command bus 与 inspector 联动。
 
+推荐进一步组合：
+
+1. 使用 `ViewportBusinessCanvasShell` 承载 panel/stage/toolbar 样板。
+2. 使用 `useViewportHostBridge` 收口 `client -> world` 与 `viewBox -> world style` 胶水。
+3. 让宿主只保留业务模型、事件处理与面板内容。
+
 ### 3.3 方式 C：宿主继续使用 React 或其他渲染栈，通过 `main-ui` mount adapter 承接
 
 这种方式下：
@@ -203,6 +209,8 @@ runtime.core.registerWorkspace({
 2. 把业务节点语义写入 `viewport-2d-kit`。
 3. 将宿主服务实例放进 viewport payload。
 4. 让 `viewport-2d-kit` 取代宿主 renderer 本身。
+5. 在每个宿主项目重复维护同一套 panel/stage/toolbar 样板，而不复用 `ViewportBusinessCanvasShell`。
+6. 在宿主组件里手写多份 `clientX/clientY -> world` 胶水，而不统一收口到 bridge。
 
 ## 9. 最小验收清单
 

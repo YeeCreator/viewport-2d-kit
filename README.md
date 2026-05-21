@@ -13,7 +13,7 @@
 - 核心入口：`viewport-2d-kit/core`
    - 与框架无关的相机、交互、约束、渲染辅助、坐标换算能力。
 - Vue 入口：`viewport-2d-kit/vue`
-   - `Viewport2DCanvas` 与 Vue 侧编辑器桥接能力。
+   - `Viewport2D`、`Viewport2DCanvas`、`ViewportBusinessCanvasShell` 与 Vue 侧宿主桥接能力。
 - main-ui 入口：`viewport-2d-kit/main-ui`
    - 提供 `ViewportMainUiEditor` 与注册辅助函数，用于作为 `main-ui` 编辑器加载。
 
@@ -120,6 +120,17 @@ import { ViewportMainUiEditor } from 'viewport-2d-kit/main-ui';
 
 runtime.vue.registerEditorRenderer('viewport-foundation-editor', ViewportMainUiEditor);
 ```
+
+### 4) Vue 宿主画布壳 + bridge
+
+```ts
+import { Viewport2D, ViewportBusinessCanvasShell, useViewportHostBridge } from 'viewport-2d-kit/vue';
+```
+
+适用场景：
+- 宿主已经有自己的业务状态机与 Inspector。
+- 需要复用“三栏布局 + toolbar + viewport body”壳，而不想在每个项目重复写布局样板。
+- 需要复用 `client -> world` 与 `screen delta -> world delta` 的桥接函数。
 
 ## main-ui 编辑器定位
 

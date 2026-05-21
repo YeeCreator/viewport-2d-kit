@@ -49,6 +49,8 @@ export {
   localCssPxToCanvasPx,
   canvasPxToLocalCssPx,
   clientToLocalCssPoint,
+  clientToWorldPoint,
+  clientEventToWorldPoint,
   localCssToWorkspaceCss,
   workspaceCssToLocalCss,
   worldToWorkspaceCss,

@@ -7,7 +7,7 @@
 - 核心入口：`viewport-2d-kit/core`
   - 包含相机、交互、约束、渲染辅助、坐标换算等与框架无关能力。
 - Vue 入口：`viewport-2d-kit/vue`
-  - 导出 `Viewport2DCanvas` 与 main-ui 编辑器桥接能力。
+  - 导出 `Viewport2D`、`Viewport2DCanvas`、`ViewportBusinessCanvasShell` 与宿主 bridge 能力。
 - main-ui 入口：`viewport-2d-kit/main-ui`
   - 导出 `ViewportMainUiEditor`、descriptor 工厂与 runtime 注册函数。
 
@@ -78,6 +78,34 @@ Vue 3 视口组件，支持平移、缩放、适配居中与 overlay。
 - `fitToCenter(): void`
 - `getCamera(): Camera2D`
 - `setCamera(next: Camera2D): void`
+
+### `ViewportBusinessCanvasShell(props)`
+
+通用 Vue 业务画布壳，负责三栏布局、toolbar 样板和 viewport body 承载。
+
+字段：
+- `leftPanelWidth?: number | string`（默认 `210`）
+- `rightPanelWidth?: number | string`（默认 `320`）
+- `toolbarHeight?: number | string`（默认 `36`）
+- `collapseEmptySidePanels?: boolean`（默认 `true`）
+
+插槽：
+- `left`
+- `toolbarLeading`
+- `toolbarCenter`
+- `toolbarTrailing`
+- 默认插槽：viewport/stage body
+- `right`
+
+### `useViewportHostBridge(hostRef, viewBox)`
+
+Vue 宿主 bridge，用于减少业务仓库重复维护 viewport 胶水。
+
+返回：
+- `viewBoxText`
+- `worldStyle`
+- `clientEventToWorld(camera, event)`
+- `screenDeltaToWorld(camera, deltaScreen)`
 
 ## main-ui 入口（`viewport-2d-kit/main-ui`）
 

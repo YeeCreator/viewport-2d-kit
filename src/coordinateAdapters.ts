@@ -73,6 +73,21 @@ export function clientToLocalCssPoint(wrapEl: HTMLDivElement, clientX: number, c
   return { x: clientX - rect.left, y: clientY - rect.top };
 }
 
+/** 浏览器 client 坐标 -> world 坐标。 */
+export function clientToWorldPoint(wrapEl: HTMLDivElement, camera: Camera2D, clientX: number, clientY: number): WorldPoint {
+  const localCss = clientToLocalCssPoint(wrapEl, clientX, clientY);
+  return localCssToWorld(camera, localCss);
+}
+
+/** 指针/鼠标事件 -> world 坐标。 */
+export function clientEventToWorldPoint(
+  wrapEl: HTMLDivElement,
+  camera: Camera2D,
+  event: Pick<MouseEvent | PointerEvent, 'clientX' | 'clientY'>,
+): WorldPoint {
+  return clientToWorldPoint(wrapEl, camera, event.clientX, event.clientY);
+}
+
 /** wrap 本地 CSS 坐标 -> workspace CSS 坐标。 */
 export function localCssToWorkspaceCss(wrapEl: HTMLDivElement, localCss: CssPoint): CssPoint {
   return { x: localCss.x + wrapEl.scrollLeft, y: localCss.y + wrapEl.scrollTop };
