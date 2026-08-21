@@ -1098,3 +1098,7 @@ rust-project.json
 
 
 
+
+# mailbox/relay — 运行时状态与归档（不入库）
+.mailbox/
+docs/mailbox/relay/archive/
