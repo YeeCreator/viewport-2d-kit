@@ -2,6 +2,34 @@
 
 > 记录每一次功能新增/改动/修复的摘要，便于回溯。
 
+## 2026-08-26
+
+### 方案 B：V2D 内核化 pixi（渲染内核唯一化）
+
+背景：battle-games 实际预览发现三大问题（内容视口错位 / 地图卡住 / 地形马赛克），
+根因是“V2D 相机数学 + 自研 CanvasRenderer”两套视口并存。经决策采用**方案 B**：
+V2D 作为视口外壳（core 纯函数），pixi.js 作为唯一渲染内核。
+
+代码：
+
+1. 新增 `src/pixi/PixiViewport.ts`：
+  - 管理 `PIXI.Application` + world 容器，统一应用相机矩阵（`world.scale.set(scale)` + `world.position.set(pan)`）。
+  - 复用 core 纯函数：`fitCameraToViewBox` / `panBy` / `zoomAtScreenPoint` / `screenToWorld`。
+  - 交互：pointer 拖拽平移（增量）、wheel 锚点缩放、ResizeObserver 自适应（挂载后读真实尺寸 + rAF 兜底）。
+  - `destroy()` 完整释放（事件/RO/应用）。
+2. 新增 `src/pixi/PixiViewportCanvas.ts`（Vue 组件）：
+  - `@ready` 事件暴露 `PixiViewport`；`@camera-change` 同步相机；expose `getViewport/getWorld/getCamera/fitToBounds/screenToWorld`。
+3. 新增 `src/pixi/index.ts`，`package.json` exports 增加 `./pixi`；tsup entry + external（pixi.js）；tsconfig include。
+4. pixi.js 为 peerDependencies（^8.0.0）+ devDependencies（8.20.0），业务侧自行安装。
+
+调试验证：
+
+1. `pnpm typecheck` 通过。
+2. `pnpm build` 通过（dist/pixi 产物生成）。
+3. battle-games 集成后浏览器实测：平移（100 CSS px 拖拽 → 200 device px @dpr2，精确）、缩放（面积 203%）、地形平滑（中心行 150 色/695 采样点）、无控制台错误。
+4. 修复初始化尺寸 bug：`init()` 读容器尺寸需在 `appendChild(canvas)` 之后（空 div 在 flex 下高度塌陷为 1px）。
+
+
 ## 2026-03-11
 
 ### 第二轮补全：mode-lite 迁移能力增强 + 调试验证通过

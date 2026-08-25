@@ -31,7 +31,8 @@
     "src/viewportMath.ts",
     "src/core/**/*.ts",
     "src/vue/**/*.ts",
-    "src/main-ui/**/*.ts"
+    "src/main-ui/**/*.ts",
+    "src/pixi/**/*.ts"
   ],
   "exclude": [
     "src/**/*.tsx",

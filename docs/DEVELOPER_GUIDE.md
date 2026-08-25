@@ -4,11 +4,11 @@
 
 ## 1. 目标与定位
 
-`viewport-2d-kit` 当前采用“模式化引擎”路线：
+`viewport-2d-kit` 当前架构（2026-08 起）：
 
-1. `lite` 模式：`react-infinite-viewer`
-2. `game/map` 模式：`pixi-viewport`
-3. `Viewport2D`：历史自研实现，仅兼容保留
+1. **`game/map` 模式：pixi 渲染内核（方案 B，唯一官方渲染内核）** —— `src/pixi/PixiViewport.ts` 管理 `PIXI.Application` + world 容器并统一应用相机矩阵；`src/pixi/PixiViewportCanvas.ts` 是 Vue 组件。core（相机数学/坐标换算/约束/交互）保留为“视口外壳”纯函数。
+2. `lite` 模式：`react-infinite-viewer`（只读轻量场景）。
+3. `Viewport2D` / `Viewport2DCanvas`：历史自研实现（CSS transform + slot），仅兼容保留，**渲染内核已由 pixi 取代，不再扩展**。
 
 常用于：轻量画布、地图编辑、游戏镜头、无限画布应用。
 
@@ -45,7 +45,11 @@
 	- `src/viewportMath.ts`
 	- `src/controller.ts`
 	- `src/coordinateAdapters.ts`
-6. Vue 宿主层：
+6. **pixi 渲染内核（方案 B）**：
+	- `src/pixi/PixiViewport.ts`（PIXI.Application + world 容器 + 相机矩阵 + 交互）
+	- `src/pixi/PixiViewportCanvas.ts`（Vue 组件，`@ready` 暴露 PixiViewport）
+	- `src/pixi/index.ts`（`viewport-2d-kit/pixi` 子入口）
+7. Vue 宿主层：
 	- `src/vue/useViewportHostBridge.ts`
 	- `src/vue/ViewportBusinessCanvasShell.ts`
 
@@ -60,9 +64,9 @@
 7. `src/ui.ts`：可选 UI 子入口。
 
 设计约束：
-1. 新增能力优先落在模式层，不再扩展 `Viewport2D` 的底层交互能力。
-2. `game/map` 不在库内硬编码 Pixi 场景树，由业务通过 `renderPixiMode` 注入。
-3. 对外协议保持稳定：`getCamera`、`setCamera`、`fitToCenter`、`zoomTo`。
+1. 新增能力优先落在 pixi 内核层（`src/pixi/`），不再扩展 `Viewport2D` / `Viewport2DCanvas` 的 CSS transform 渲染路径。
+2. **渲染内核唯一化**：`pixi.js` 是 peerDependency（tsup external），业务侧安装；`Viewport2DCanvas` 的 CSS `cameraTransform` + slot 模式不再用于对局视口。
+3. 对外协议保持稳定：`getCamera`、`setCamera`、`fitToCenter`、`zoomTo`（pixi 内核为 `fitToBounds` / `panBy` / `zoomAtScreenPoint` / `screenToWorld`）。
 
 ## 3.2 coordinateAdapters 设计边界
 
