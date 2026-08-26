@@ -4,6 +4,49 @@
 
 ## 2026-08-26
 
+### 方案 B 定稿：pixi 内核唯一化 + main-ui 薄连接器（第二轮）
+
+背景：方案 B 第一轮仅落地 pixi 内核与 battle-games 接入；本轮把 V2D 自身内容补完，
+对齐“V3D = three.js 内核 + 薄壳”的架构：**渲染/功能全部走 pixi 内核，V2D 对外只是
+能放进 main-ui 标签页的薄连接器**。下游（autodo / complex-system-gallery / matheshop /
+yeegames）等新特性发布后按新入口升级。
+
+代码：
+
+1. `src/pixi/PixiViewport.ts` 增强：
+  - 新增 `setViewBox(viewBox)`（更新世界范围并自动 fit）、`getViewBox()`、`getSize()`。
+  - 新增 `fitToBounds(viewBox?)`（可指定目标范围）。
+  - 新增 `onInteractingChange(cb)` / `isInteracting()`（拖拽状态回调）。
+  - options 增加 `antialias` / `resolution` / `autoDensity` / `preserveDrawingBuffer` 可配。
+2. `src/pixi/PixiViewportCanvas.ts` 增强：
+  - 新增 `@interacting-change` 事件；viewBox 响应式 watch（外部切换世界范围自动 refit）。
+  - expose 补全：`getSize` / `setViewBox` / `worldToScreen` / `panBy` / `zoomAtScreenPoint` / `isInteracting`。
+3. 新增 `src/react-pixi/PixiViewportReact.tsx`（React 薄封装）+ `./react-pixi` 子入口：
+  - 容器生命周期 + 内核挂载 + 事件透传；`onReady(viewport)` 向 world 添加内容。
+4. **main-ui 薄连接器切换 pixi 内核**：`src/main-ui/mainUiEditor.ts`（自 `src/vue/` git mv 迁移）：
+  - `ViewportMainUiEditor` 内部改挂 `PixiViewportCanvas`，payload 的 `nodes` / `edges` 以 pixi Graphics 绘制进 world 容器（原 CSS transform + SVG overlay 移除）。
+  - descriptor 工厂 / `registerViewportMainUiEditor` / 常量契约不变，下游无需改注册代码。
+5. 模式层对齐唯一内核：`resolveViewportEngine` 统一返回 `engine: 'pixi'`；新增 `listLegacyViewportEngines()` 列出历史第三方引擎（react-infinite-viewer / pixi-viewport，`legacy: true`）。
+6. 构建：tsup 增加 `react-pixi` 入口；`package.json` exports 增加 `./react-pixi`。
+
+调试验证：
+
+1. `pnpm typecheck` / `pnpm build` 通过（dist/react-pixi、dist/main-ui 产物生成）。
+2. battle-games 回归：`pnpm typecheck` 通过；浏览器实测对局主视口 pixi canvas 1390×1042（@dpr2）+ minimap 108×74，无 console 报错。
+3. main-ui demo 实测薄连接器：`viewport-foundation-editor` 在 autodo 工作区正常打开，pixi canvas 挂载，指针坐标换算精确（canvas 内 (100,60) → badge “pointer: 100, 60”），拖拽平移正常，无 console 报错。
+
+文档：
+
+1. `README.md`：架构改为“pixi 内核 + 薄连接器”，入口清单新增 `pixi` / `react-pixi`。
+2. `docs/API手册.md`：新增 pixi 内核、react-pixi、main-ui 薄连接器章节；迁移说明更新。
+3. `docs/使用指南.md`：推荐路线改为 pixi 内核唯一；新增 React 与薄连接器用法。
+4. `docs/DEVELOPER_GUIDE.md`：架构/模块/入口分层更新；历史兼容层标注。
+5. `docs/MAIN_UI_INTEGRATION_GUIDE.md`：薄连接器定位、接入方式 A/B、错误接法、验收清单更新。
+6. `docs/示例集成.md` + 新增 `docs/examples/pixi-viewport-example.vue`。
+7. 治理：向 4 个下游写 `docs/mailbox/relay/updates/outbox/*` 更新通知。
+
+## 2026-08-26
+
 ### 方案 B：V2D 内核化 pixi（渲染内核唯一化）
 
 背景：battle-games 实际预览发现三大问题（内容视口错位 / 地图卡住 / 地形马赛克），

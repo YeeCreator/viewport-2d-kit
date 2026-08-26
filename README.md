@@ -1,6 +1,9 @@
 # viewport-2d-kit
 
-可复用的 2D 视窗（平移 + 缩放）工具包，定位为 **Vue3 + core** 的编辑器基础包。
+可复用的 2D 视窗（平移 + 缩放）工具包。**架构对齐 V3D（three.js 内核 + 薄壳）**：
+
+- **渲染内核 = pixi.js（`viewport-2d-kit/pixi`）**：相机、坐标换算、交互、绘制全部由 `PixiViewport` 唯一管理，业务向 `world` 容器添加世界坐标的 Graphics/Sprite，获得 pixi 高性能渲染。
+- **薄连接器 = `viewport-2d-kit/main-ui`**：`ViewportMainUiEditor` 只是“能放进 main-ui 标签页的窗口外观”，内部挂载 pixi 内核，不承载渲染实现。
 
 本包可直接作为 `main-ui` 的编辑器实现被注册到任意工作区标签页。
 
@@ -9,13 +12,17 @@
 ## 入口
 
 - 根入口：`viewport-2d-kit`
-   - 聚合导出 `core`、`vue`、`main-ui`。
+   - 聚合导出 `core`、`vue`、`main-ui`、`pixi`。
 - 核心入口：`viewport-2d-kit/core`
-   - 与框架无关的相机、交互、约束、渲染辅助、坐标换算能力。
-- Vue 入口：`viewport-2d-kit/vue`
-   - `Viewport2D`、`Viewport2DCanvas`、`ViewportBusinessCanvasShell` 与 Vue 侧宿主桥接能力。
+   - 与框架无关的相机、交互、约束、渲染辅助、坐标换算能力（内核数学）。
+- **pixi 渲染内核入口：`viewport-2d-kit/pixi`**
+   - `PixiViewport`（PIXI.Application + world 容器 + 相机 + 交互）+ `PixiViewportCanvas`（Vue 薄封装）。**当前推荐入口。**
+- **React 薄封装入口：`viewport-2d-kit/react-pixi`**
+   - `PixiViewportReact`：pixi 内核的 React 组件（服务于 React 宿主）。
 - main-ui 入口：`viewport-2d-kit/main-ui`
-   - 提供 `ViewportMainUiEditor` 与注册辅助函数，用于作为 `main-ui` 编辑器加载。
+   - 提供薄连接器 `ViewportMainUiEditor` 与注册辅助函数，用于作为 `main-ui` 编辑器加载。
+- Vue 入口：`viewport-2d-kit/vue`
+   - `Viewport2D`、`Viewport2DCanvas`、`ViewportBusinessCanvasShell` 与 Vue 侧宿主桥接能力（**历史兼容层，新项目请走 `pixi` 入口**）。
 
 ## 开发
 
@@ -121,7 +128,44 @@ import { ViewportMainUiEditor } from 'viewport-2d-kit/main-ui';
 runtime.vue.registerEditorRenderer('viewport-foundation-editor', ViewportMainUiEditor);
 ```
 
-### 4) Vue 宿主画布壳 + bridge
+### 4) 使用 pixi 渲染内核（推荐）
+
+Vue 宿主（如 battle-games）：
+
+```vue
+<template>
+  <PixiViewportCanvas
+    :view-box="{ x: 0, y: 0, width: 900, height: 620 }"
+    @ready="onPixiReady"
+    @camera-change="onCameraChange"
+  />
+</template>
+
+<script setup lang="ts">
+import { PixiViewportCanvas, type PixiViewport } from 'viewport-2d-kit/pixi';
+
+function onPixiReady(viewport: PixiViewport) {
+  // 内核就绪：向 world 容器添加世界坐标内容，相机由内核唯一管理
+  const g = new Graphics().rect(0, 0, 100, 100).fill(0xdcfce7);
+  viewport.world.addChild(g);
+}
+</script>
+```
+
+React 宿主：
+
+```tsx
+import { PixiViewportReact } from 'viewport-2d-kit/react-pixi';
+
+<PixiViewportReact
+  viewBox={{ x: 0, y: 0, width: 900, height: 620 }}
+  onReady={(viewport) => {
+    viewport.world.addChild(new Graphics().circle(0, 0, 20).fill(0x3b82f6));
+  }}
+/>
+```
+
+### 5) Vue 宿主画布壳 + bridge（历史兼容层）
 
 ```ts
 import { Viewport2D, ViewportBusinessCanvasShell, useViewportHostBridge } from 'viewport-2d-kit/vue';
@@ -132,11 +176,24 @@ import { Viewport2D, ViewportBusinessCanvasShell, useViewportHostBridge } from '
 - 需要复用“三栏布局 + toolbar + viewport body”壳，而不想在每个项目重复写布局样板。
 - 需要复用 `client -> world` 与 `screen delta -> world delta` 的桥接函数。
 
-## main-ui 编辑器定位
+## main-ui 编辑器定位（薄连接器）
 
-- 工具包提供了可直接挂到 `main-ui` 的 Vue 编辑器组件。
-- 编辑器 payload 支持：`viewBox`、`minScale`、`maxScale`、`paddingPx`、`nodes`、`edges`。
+- 工具包提供了可直接挂到 `main-ui` 的 Vue 编辑器组件 `ViewportMainUiEditor`，其内部挂载 pixi 渲染内核。
+- 编辑器 payload 支持：`viewBox`、`minScale`、`maxScale`、`paddingPx`、`nodes`、`edges`（demo 内容以 Graphics 绘制进 world 容器）。
 - 同一 renderer 可被多个工作区引用，从而实现“任意窗口（标签页）加载使用”。
+- 连接器只负责窗口外观与注册，不承载渲染实现——渲染全部在 pixi 内核。
+
+## 架构总览（V3D 同构）
+
+```text
+main-ui 工作台（标签页/窗口生命周期）
+  └─ viewport-2d-kit/main-ui（薄连接器：窗口外观 + 注册）
+       └─ viewport-2d-kit/pixi（PixiViewport 渲染内核：pixi.js）
+            └─ world 容器（业务 Graphics/Sprite，世界坐标）
+```
+
+- 内核数学（core）与 pixi 内核（pixi）是唯一推荐路径。
+- `Viewport2DCanvas`（CSS transform + slot）与 `mode-lite`（react-infinite-viewer）、第三方 `pixi-viewport` 均为**历史兼容层**，新项目不要使用。
 
 ## 核心概念
 

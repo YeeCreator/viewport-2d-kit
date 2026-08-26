@@ -2,7 +2,7 @@
 
 本文说明 `viewport-2d-kit` 在 `main-ui` 编辑器体系中的标准位置、推荐接法与边界约束。
 
-结论先行：`viewport-2d-kit` 是 editor renderer 内部的 2D foundation，不是 `main-ui/core` 的一部分。
+结论先行：`viewport-2d-kit` 是 editor renderer 内部的 2D foundation，不是 `main-ui/core` 的一部分。**自方案 B（2026-08-26）起，渲染内核唯一化为 pixi.js，`main-ui` 连接器是薄壳。**
 
 ## 0. 接入前必读规范
 
@@ -31,27 +31,25 @@
 ```text
 main-ui workspace
 -> main-ui editor descriptor
--> 宿主 renderer / mount adapter
--> viewport-2d-kit
--> 业务绘制内容
+-> 薄连接器（viewport-2d-kit/main-ui：ViewportMainUiEditor）
+-> pixi 渲染内核（viewport-2d-kit/pixi：PixiViewport，pixi.js）
+-> 业务绘制内容（world 容器中的 Graphics/Sprite）
 ```
 
 也就是说：
 
 1. `main-ui` 负责工作台生命周期。
-2. `viewport-2d-kit` 负责 2D 世界空间、相机、平移、缩放与坐标换算。
-3. 宿主业务 renderer 负责把业务模型画到这个视口里。
+2. 薄连接器（`main-ui` 入口）只提供标签页窗口外观与注册。
+3. pixi 内核（`pixi` 入口）负责 2D 世界空间、相机、平移、缩放、坐标换算与**全部渲染**。
+4. 宿主业务 renderer 负责把业务模型画到这个视口里（向 `world` 添加世界坐标内容）。
 
 ## 2. `viewport-2d-kit` 解决什么问题
 
 `viewport-2d-kit` 负责：
 
-1. camera 模型。
-2. 滚轮平移与缩放。
-3. 触摸缩放。
-4. world 与 screen 坐标换算。
-5. Vue 编辑器桥接。
-6. `main-ui` 编辑器辅助注册。
+1. pixi 渲染内核（`PixiViewport`）：camera 模型、滚轮/拖拽平移、锚点缩放、world/screen 坐标换算、渲染。
+2. Vue 薄封装 `PixiViewportCanvas` 与 React 薄封装 `PixiViewportReact`。
+3. `main-ui` 薄连接器 `ViewportMainUiEditor` 与编辑器辅助注册。
 
 `viewport-2d-kit` 不负责：
 
@@ -62,9 +60,9 @@ main-ui workspace
 
 ## 3. 推荐接入方式
 
-### 3.1 方式 A：直接使用 `viewport-2d-kit/main-ui`
+### 3.1 方式 A：薄连接器（推荐，pixi 内核）
 
-当宿主只需要一个中性的 viewport editor，可直接使用：
+当宿主需要一个中性且高性能的 viewport editor，直接使用薄连接器：
 
 ```ts
 import { ViewportMainUiEditor } from 'viewport-2d-kit/main-ui'
@@ -78,10 +76,14 @@ runtime.vue.registerEditorRenderer('viewport-foundation-editor', ViewportMainUiE
 2. 中性编辑器底座验证。
 3. 宿主先验证工作台与 viewport 的组合是否成立。
 
-### 3.2 方式 B：使用 `viewport-2d-kit/vue`，由宿主自定义 renderer
+该连接器内部挂载 `PixiViewportCanvas`（pixi 渲染内核），payload 的 `nodes` / `edges` 以 Graphics 绘制进 world 容器。
+
+### 3.2 方式 B：直接使用 pixi 内核，由宿主自定义 renderer
 
 ```ts
-import { Viewport2DCanvas } from 'viewport-2d-kit/vue'
+import { PixiViewportCanvas } from 'viewport-2d-kit/pixi'
+// React 宿主：
+import { PixiViewportReact } from 'viewport-2d-kit/react-pixi'
 ```
 
 适用场景：
@@ -90,11 +92,7 @@ import { Viewport2DCanvas } from 'viewport-2d-kit/vue'
 2. 宿主需要把业务节点、边、棋子、图形画在 viewport 内。
 3. 宿主需要自己的 context、service、command bus 与 inspector 联动。
 
-推荐进一步组合：
-
-1. 使用 `ViewportBusinessCanvasShell` 承载 panel/stage/toolbar 样板。
-2. 使用 `useViewportHostBridge` 收口 `client -> world` 与 `viewBox -> world style` 胶水。
-3. 让宿主只保留业务模型、事件处理与面板内容。
+推荐做法：宿主业务 renderer 通过 `@ready`（Vue）或 `onReady`（React）拿到 `PixiViewport`，向 `world` 容器添加世界坐标内容，相机由内核唯一管理。
 
 ### 3.3 方式 C：宿主继续使用 React 或其他渲染栈，通过 `main-ui` mount adapter 承接
 
@@ -153,7 +151,7 @@ runtime.core.registerWorkspace({
 2. `minScale`
 3. `maxScale`
 4. `paddingPx`
-5. `variant`
+5. `nodes` / `edges`（demo 级轻量内容，绘制进 pixi world）
 6. 轻量引用型业务参数
 
 不应写入：
@@ -209,15 +207,16 @@ runtime.core.registerWorkspace({
 2. 把业务节点语义写入 `viewport-2d-kit`。
 3. 将宿主服务实例放进 viewport payload。
 4. 让 `viewport-2d-kit` 取代宿主 renderer 本身。
-5. 在每个宿主项目重复维护同一套 panel/stage/toolbar 样板，而不复用 `ViewportBusinessCanvasShell`。
-6. 在宿主组件里手写多份 `clientX/clientY -> world` 胶水，而不统一收口到 bridge。
+5. 新项目继续使用 CSS transform 的 `Viewport2DCanvas` / `Viewport2D` 或第三方 `pixi-viewport`（历史兼容层，渲染内核唯一化为 `PixiViewport`）。
+6. 在宿主组件里手写多份 `clientX/clientY -> world` 胶水，而不统一走 `PixiViewport.screenToWorld`。
+7. 在薄连接器（`src/main-ui/`）里承载业务渲染实现。
 
 ## 9. 最小验收清单
 
 一轮 `main-ui` 组合接入至少应满足：
 
-1. viewport editor 能作为普通 tab 打开。
-2. 平移、缩放、fit 行为正常。
+1. viewport editor 能作为普通 tab 打开（薄连接器内部 pixi canvas 已挂载）。
+2. 平移、缩放、fit 行为正常（pixi 内核，无控制台报错）。
 3. `main-ui` 的 workspace 切换不破坏 viewport state。
 4. 宿主业务逻辑没有被写入 `main-ui/core` 或 `viewport-2d-kit`。
 5. 宿主刷新后可恢复轻量 payload。

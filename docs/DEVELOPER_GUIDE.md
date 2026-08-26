@@ -4,11 +4,11 @@
 
 ## 1. 目标与定位
 
-`viewport-2d-kit` 当前架构（2026-08 起）：
+`viewport-2d-kit` 当前架构（2026-08-26 起，方案 B 定稿）：
 
-1. **`game/map` 模式：pixi 渲染内核（方案 B，唯一官方渲染内核）** —— `src/pixi/PixiViewport.ts` 管理 `PIXI.Application` + world 容器并统一应用相机矩阵；`src/pixi/PixiViewportCanvas.ts` 是 Vue 组件。core（相机数学/坐标换算/约束/交互）保留为“视口外壳”纯函数。
-2. `lite` 模式：`react-infinite-viewer`（只读轻量场景）。
-3. `Viewport2D` / `Viewport2DCanvas`：历史自研实现（CSS transform + slot），仅兼容保留，**渲染内核已由 pixi 取代，不再扩展**。
+1. **pixi 渲染内核（唯一官方渲染内核）** —— `src/pixi/PixiViewport.ts` 管理 `PIXI.Application` + world 容器并统一应用相机矩阵（`world.scale.set(scale)` + `world.position.set(pan)`）；`src/pixi/PixiViewportCanvas.ts` 是 Vue 薄封装；`src/react-pixi/PixiViewportReact.tsx` 是 React 薄封装。core（相机数学/坐标换算/约束/交互）保留为“视口外壳”纯函数，被内核复用。
+2. **main-ui 薄连接器** —— `src/main-ui/mainUiEditor.ts`：只提供“能放进 main-ui 标签页的窗口外观”，内部挂载 pixi 内核；demo 内容以 Graphics 画进 world 容器。
+3. 历史兼容层（不再扩展，仅存量迁移期使用）：`Viewport2D` / `Viewport2DCanvas`（CSS transform + slot）、`ViewportLite` / `ViewportModeHost`（react-infinite-viewer）、第三方 `pixi-viewport`。
 
 常用于：轻量画布、地图编辑、游戏镜头、无限画布应用。
 
@@ -27,46 +27,53 @@
 
 ## 3. 组件与核心模块
 
-1. 兼容层：
+1. 兼容层（历史）：
 	- `src/Viewport2D.tsx`
 	- `src/useViewportCamera.ts`
 	- `src/interactions.ts`
-2. 模式层：
+2. 模式层（历史兼容，引擎映射已指向 pixi 内核）：
 	- `src/modes/contracts.ts`
 	- `src/modes/engineSelector.ts`
 	- `src/modes/ViewportModeHost.tsx`
-3. `mode-lite`：
+3. `mode-lite`（历史兼容）：
 	- `src/modes/modeLite/ViewportLite.tsx`
 	- `src/modes/modeLite/createLiteModeController.ts`
-4. `mode-game/map`：
+4. `mode-game/map`（元信息，历史兼容）：
 	- `src/modes/modeGame/index.ts`
 	- `src/modes/modeMap/index.ts`
 5. 工具层：
 	- `src/viewportMath.ts`
 	- `src/controller.ts`
 	- `src/coordinateAdapters.ts`
-6. **pixi 渲染内核（方案 B）**：
-	- `src/pixi/PixiViewport.ts`（PIXI.Application + world 容器 + 相机矩阵 + 交互）
-	- `src/pixi/PixiViewportCanvas.ts`（Vue 组件，`@ready` 暴露 PixiViewport）
+6. **pixi 渲染内核（唯一内核）**：
+	- `src/pixi/PixiViewport.ts`（PIXI.Application + world 容器 + 相机矩阵 + 交互 + viewBox/size/交互状态）
+	- `src/pixi/PixiViewportCanvas.ts`（Vue 薄封装，`@ready` 暴露 PixiViewport）
 	- `src/pixi/index.ts`（`viewport-2d-kit/pixi` 子入口）
-7. Vue 宿主层：
+7. **React 薄封装**：
+	- `src/react-pixi/PixiViewportReact.tsx`
+	- `src/react-pixi/index.ts`（`viewport-2d-kit/react-pixi` 子入口）
+8. **main-ui 薄连接器**：
+	- `src/main-ui/mainUiEditor.ts`（`ViewportMainUiEditor` + descriptor 工厂 + 注册函数）
+	- `src/main-ui/index.ts`（`viewport-2d-kit/main-ui` 子入口）
+9. Vue 宿主层（历史兼容壳）：
 	- `src/vue/useViewportHostBridge.ts`
 	- `src/vue/ViewportBusinessCanvasShell.ts`
 
 ## 3.1 入口分层
 
-1. `src/index.ts`：统一入口（兼容导出 + 模式化导出）。
-2. `src/core.ts`：核心子入口。
-3. `src/modes/index.ts`：模式协议与模式宿主。
-4. `src/mode-lite.ts`：lite 子入口。
-5. `src/mode-game.ts`：game 子入口。
-6. `src/mode-map.ts`：map 子入口。
-7. `src/ui.ts`：可选 UI 子入口。
+1. `src/index.ts`：统一入口（聚合 core/vue/main-ui/pixi）。
+2. `src/core/index.ts`：内核数学子入口。
+3. `src/pixi/index.ts`：pixi 渲染内核子入口。
+4. `src/react-pixi/index.ts`：React 薄封装子入口。
+5. `src/main-ui/index.ts`：main-ui 薄连接器子入口。
+6. `src/vue/index.ts`：Vue 历史兼容层子入口。
+7. `src/react-legacy/index.ts`：React 历史兼容层子入口。
 
 设计约束：
 1. 新增能力优先落在 pixi 内核层（`src/pixi/`），不再扩展 `Viewport2D` / `Viewport2DCanvas` 的 CSS transform 渲染路径。
 2. **渲染内核唯一化**：`pixi.js` 是 peerDependency（tsup external），业务侧安装；`Viewport2DCanvas` 的 CSS `cameraTransform` + slot 模式不再用于对局视口。
-3. 对外协议保持稳定：`getCamera`、`setCamera`、`fitToCenter`、`zoomTo`（pixi 内核为 `fitToBounds` / `panBy` / `zoomAtScreenPoint` / `screenToWorld`）。
+3. 对外协议保持稳定：`getCamera`、`setCamera`、`fitToBounds`、`panBy`、`zoomAtScreenPoint`、`screenToWorld`、`worldToScreen`。
+4. 薄连接器（`src/main-ui/`）不得承载业务渲染，只做窗口外观与注册。
 
 ## 3.2 coordinateAdapters 设计边界
 
@@ -96,11 +103,12 @@
 2. 业务面板字段。
 3. 业务命令总线、服务容器、状态仓库。
 
-## 4. 关于 `Viewport2D` 兼容层
+## 4. 关于历史兼容层
 
 1. `Viewport2D` 作为历史实现继续可用，但定位为兼容层。
 2. 兼容层允许修复问题，不再承接新特性迭代。
-3. 新模块请直接接入 `ViewportLite` 或 `ViewportModeHost`。
+3. 新模块请直接接入 pixi 内核（`src/pixi/`）或薄连接器（`src/main-ui/`）。
+4. `resolveViewportEngine` 已统一返回 `engine: 'pixi'`；旧第三方引擎可用 `listLegacyViewportEngines()` 查询。
 
 ## 5. 关于 overlay 是否可交互（非常重要）
 
@@ -126,12 +134,12 @@
 构建产物将包含：
 
 1. `dist/index.*`
-2. `dist/core.*`
-3. `dist/modes/index.*`
-4. `dist/mode-lite.*`
-5. `dist/mode-game.*`
-6. `dist/mode-map.*`
-7. `dist/ui.*`
+2. `dist/core/index.*`
+3. `dist/pixi/index.*`
+4. `dist/react-pixi/index.*`
+5. `dist/main-ui/index.*`
+6. `dist/vue/index.*`
+7. `dist/react-legacy/index.*`
 
 ## 7. 作为 file 依赖被引用时
 
