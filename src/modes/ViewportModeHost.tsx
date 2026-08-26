@@ -41,7 +41,8 @@ export function ViewportModeHost(props: ViewportModeHostProps) {
 
   return (
     <div style={{ padding: 12, color: '#444', fontSize: 13 }}>
-      当前模式为 <code>{props.mode}</code>，请通过 <code>renderPixiMode</code> 注入 pixi-viewport 视图。
+      当前模式为 <code>{props.mode}</code>，请通过 <code>renderPixiMode</code> 注入基于{' '}
+      <code>viewport-2d-kit/pixi</code>（PixiViewport）的视图。
     </div>
   );
 }

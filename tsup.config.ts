@@ -8,6 +8,7 @@ export default defineConfig({
     'src/main-ui/index.ts',
     'src/react-legacy/index.ts',
     'src/pixi/index.ts',
+    'src/react-pixi/index.ts',
   ],
   format: ['esm'],
   dts: true,

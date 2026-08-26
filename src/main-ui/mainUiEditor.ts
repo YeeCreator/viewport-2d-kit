@@ -1,3 +1,13 @@
+/**
+ * mainUiEditor —— viewport-2d-kit 的 main-ui 薄连接器。
+ *
+ * 定位（对齐 V3D = three.js 内核 + 薄壳的架构）：
+ *   - 渲染内核：`viewport-2d-kit/pixi` 的 `PixiViewport`（pixi.js 高性能渲染，
+ *     相机、坐标换算、交互全部由内核唯一管理）。
+ *   - 薄壳：本组件只提供"能放进 main-ui 标签页的窗口外观"——标题/描述/状态徽标
+ *     DOM 外壳 + 把 demo 业务数据画进 pixi world 容器。连接器不承载渲染实现。
+ *   - 注册：`registerViewportMainUiEditor` 一键注册 editor descriptor + renderer。
+ */
 import { computed, defineComponent, h, ref, watch, type PropType } from 'vue';
 import { Graphics, Text } from 'pixi.js';
 import { PixiViewportCanvas } from '../pixi/PixiViewportCanvas';

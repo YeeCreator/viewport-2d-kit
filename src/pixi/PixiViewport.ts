@@ -24,10 +24,14 @@ export interface PixiViewportOptions {
   paddingPx?: number;
   /** pixi 背景色（0xRRGGBB） */
   background?: number;
+  /** 是否开启 MSAA 抗锯齿（默认 false：点阵风格无需 MSAA，且大 canvas 上 MSAA 开销大） */
   antialias?: boolean;
+  /** 内部分辨率倍数（默认 devicePixelRatio，保持清晰；调低可提速但文字模糊） */
   resolution?: number;
   /** 是否自动适配设备像素比（autoDensity） */
   autoDensity?: boolean;
+  /** 是否保留绘制缓冲（默认 false；仅调试 readPixels 时开 true，否则显著拖慢 WebGL） */
+  preserveDrawingBuffer?: boolean;
   /** 禁用平移（只读视口） */
   disablePan?: boolean;
 }
@@ -43,6 +47,10 @@ export class PixiViewport {
   private maxScale: number;
   private paddingPx: number;
   private background: number;
+  private antialias: boolean;
+  private resolution: number;
+  private autoDensity: boolean;
+  private preserveDrawingBuffer: boolean;
   private disablePan: boolean;
 
   private camera: Camera2D;
@@ -50,8 +58,10 @@ export class PixiViewport {
 
   private resizeObserver: ResizeObserver | null = null;
   private onCameraChangeCb: ((camera: Camera2D) => void) | null = null;
+  private onInteractingChangeCb: ((interacting: boolean) => void) | null = null;
 
   // 交互状态
+  private interacting = false;
   private pointerState = { pointerId: -1, lastX: 0, lastY: 0, active: false };
 
   private bound = {
@@ -69,6 +79,10 @@ export class PixiViewport {
     this.maxScale = opts.maxScale ?? 8;
     this.paddingPx = opts.paddingPx ?? 40;
     this.background = opts.background ?? 0xf5f2e9;
+    this.antialias = opts.antialias ?? false;
+    this.resolution = opts.resolution ?? (typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1);
+    this.autoDensity = opts.autoDensity ?? true;
+    this.preserveDrawingBuffer = opts.preserveDrawingBuffer ?? false;
     this.disablePan = opts.disablePan ?? false;
 
     this.camera = { scale: 1, pan: { x: 0, y: 0 } };
@@ -80,10 +94,10 @@ export class PixiViewport {
   async init(): Promise<void> {
     await this.app.init({
       backgroundColor: this.background,
-      antialias: true,
-      resolution: window.devicePixelRatio || 1,
-      autoDensity: true,
-      preserveDrawingBuffer: true,
+      antialias: this.antialias,
+      resolution: this.resolution,
+      autoDensity: this.autoDensity,
+      preserveDrawingBuffer: this.preserveDrawingBuffer,
     });
 
     this.app.canvas.style.width = '100%';
@@ -119,6 +133,32 @@ export class PixiViewport {
     this.onCameraChangeCb = cb;
   }
 
+  /** 交互状态回调（拖拽中 true / 空闲 false，外部用于同步 UI 状态）。 */
+  onInteractingChange(cb: (interacting: boolean) => void): void {
+    this.onInteractingChangeCb = cb;
+  }
+
+  /** 当前是否处于拖拽交互中。 */
+  isInteracting(): boolean {
+    return this.interacting;
+  }
+
+  /** 更新世界范围 viewBox 并自动重新 fit（相机归位到新范围）。 */
+  setViewBox(viewBox: ViewBox): void {
+    this.viewBox = { ...viewBox };
+    this.fitToBounds();
+  }
+
+  /** 读取当前世界范围 viewBox。 */
+  getViewBox(): ViewBox {
+    return { ...this.viewBox };
+  }
+
+  /** 读取容器渲染尺寸（CSS 像素）。 */
+  getSize(): { width: number; height: number } {
+    return { ...this.size };
+  }
+
   getCamera(): Camera2D {
     return { scale: this.camera.scale, pan: { x: this.camera.pan.x, y: this.camera.pan.y } };
   }
@@ -137,12 +177,14 @@ export class PixiViewport {
     this.world.position.set(this.camera.pan.x, this.camera.pan.y);
   }
 
-  fitToBounds(): void {
+  /** 适配世界范围 viewBox 到容器（默认使用当前 viewBox）。 */
+  fitToBounds(viewBox?: ViewBox): void {
     if (this.size.width <= 0 || this.size.height <= 0) return;
+    const target = viewBox ?? this.viewBox;
     this.setCamera(
       fitCameraToViewBox({
         containerPx: { width: this.size.width, height: this.size.height },
-        viewBox: this.viewBox,
+        viewBox: target,
         paddingPx: this.paddingPx,
       }),
     );
@@ -173,7 +215,14 @@ export class PixiViewport {
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
     this.onCameraChangeCb = null;
+    this.onInteractingChangeCb = null;
     this.app.destroy(true, { children: true, texture: true, textureSource: true });
+  }
+
+  private setInteracting(value: boolean): void {
+    if (this.interacting === value) return;
+    this.interacting = value;
+    this.onInteractingChangeCb?.(value);
   }
 
   private bindEvents(): void {
@@ -212,6 +261,7 @@ export class PixiViewport {
     this.pointerState.lastX = event.clientX;
     this.pointerState.lastY = event.clientY;
     this.pointerState.active = true;
+    this.setInteracting(true);
     this.app.canvas.setPointerCapture(event.pointerId);
   }
 
@@ -228,6 +278,7 @@ export class PixiViewport {
     if (this.pointerState.pointerId !== event.pointerId) return;
     this.pointerState.pointerId = -1;
     this.pointerState.active = false;
+    this.setInteracting(false);
   }
 
   private handleWheel(event: WheelEvent): void {

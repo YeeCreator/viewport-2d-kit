@@ -7,7 +7,7 @@ export type {
   ViewportMainUiNode,
   ViewportMainUiEdge,
   ViewportMainUiViewBox,
-} from '../vue/mainUiEditor';
+} from './mainUiEditor';
 
 export {
   VIEWPORT_MAIN_UI_EDITOR_KIND,
@@ -15,4 +15,4 @@ export {
   ViewportMainUiEditor,
   createViewportMainUiEditorDescriptor,
   registerViewportMainUiEditor,
-} from '../vue/mainUiEditor';
+} from './mainUiEditor';

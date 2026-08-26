@@ -30,6 +30,10 @@
     "./pixi": {
       "types": "./dist/pixi/index.d.ts",
       "import": "./dist/pixi/index.js"
+    },
+    "./react-pixi": {
+      "types": "./dist/react-pixi/index.d.ts",
+      "import": "./dist/react-pixi/index.js"
     }
   },
   "files": [

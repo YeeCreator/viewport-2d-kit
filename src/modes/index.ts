@@ -5,7 +5,7 @@ export type {
   ViewportModeKind,
 } from './contracts';
 
-export { listViewportEngineDescriptors, resolveViewportEngine } from './engineSelector';
+export { listLegacyViewportEngines, listViewportEngineDescriptors, resolveViewportEngine } from './engineSelector';
 
 export type { ViewportModeHostProps } from './ViewportModeHost';
 export { ViewportModeHost } from './ViewportModeHost';
